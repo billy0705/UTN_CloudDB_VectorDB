@@ -1,0 +1,36 @@
+[
+    {
+        "Name": "PGvector",
+        "Data-info": {
+            "#vector": 10000,
+            "dimension": 1000
+        },
+        "Test round": 10,
+        "Methods": {
+            "hnsw+l2": {
+                "create_time": 0.05549120903015137,
+                "insert_time": 122.84297728538513,
+                "similarity_time": 0.05395674705505371,
+                "size": 139116544
+            },
+            "hnsw+cosine": {
+                "create_time": 0.05564522743225098,
+                "insert_time": 123.44375824928284,
+                "similarity_time": 0.05613589286804199,
+                "size": 139116544
+            },
+            "ivfflat+l2": {
+                "create_time": 0.07091236114501953,
+                "insert_time": 123.2014970779419,
+                "similarity_time": 0.05430030822753906,
+                "size": 139116544
+            },
+            "ivfflat+cosine": {
+                "create_time": 0.0522153377532959,
+                "insert_time": 124.2842309474945,
+                "similarity_time": 0.05465579032897949,
+                "size": 139108352
+            }
+        }
+    }
+]
