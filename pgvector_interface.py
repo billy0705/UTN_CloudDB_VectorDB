@@ -29,10 +29,39 @@ class PGvectorInterface:
         self.conn.commit()
         return result
 
-    def create_table(self, table_name, vector_size):
+    def create_table(self, table_name, vector_size,
+                     metrix=None, index_types=None):
         query = f'''CREATE TABLE IF NOT EXISTS {table_name}
          (id bigserial PRIMARY KEY, embedding vector({vector_size}))'''
         self.conn.execute(query)
+        index_flag = 0
+        if index_types == "hnsw":
+            index_flag = 1
+            pass
+        elif index_types == "ivfflat":
+            index_flag = 1
+            pass
+        else:
+            index_flag = 0
+            print("No index_types")
+
+        if metrix == 'l2':
+            index_flag = 1
+            metrix_name = "vector_l2_ops"
+        elif metrix == 'cosine':
+            index_flag = 1
+            metrix_name = "vector_cosine_ops"
+        else:
+            print("No metrix")
+
+        if index_flag == 1:
+            index_query = f"""
+            CREATE INDEX ON {table_name}
+            USING hnsw (embedding {metrix_name})"""
+            self.conn.execute(index_query)
+            # print("create index")
+        else:
+            print("no indexing")
         self.conn.commit()
 
     def drop_table(self, table_name):
@@ -42,10 +71,10 @@ class PGvectorInterface:
 
     def get_size_of_table(self, table_name):
         query = f"""SELECT
-         pg_size_pretty( pg_total_relation_size('{table_name}'))"""
+         pg_total_relation_size('{table_name}')"""
         result = self.conn.execute(query).fetchall()
         self.conn.commit()
-        print(result)
+        # print(result)
         return result[0][0]
 
     def insert_single_vector(self, table_name, vector):
@@ -56,14 +85,33 @@ class PGvectorInterface:
     def insert_vector_from_csv(self, table_name, csv_path):
         df = pd.read_csv(csv_path)
         df = df.to_numpy()
+        # print(f"{df.shape = }")
 
         for i in range(df.shape[1]):
-            vector = df[:, i]
+            vector = df[i, :]
             self.insert_single_vector(table_name, vector)
 
     def get_rows_cnt(self, table_name):
         query = f'SELECT COUNT(*) FROM {table_name}'
         result = self.conn.execute(query).fetchall()
-        print(result)
+        # print(result)
         self.conn.commit()
         return result[0][0]
+
+    def similarity_search(self, table_name, embedding_vector, metrix):
+        if metrix == "l2":
+            symbol = "<->"
+        elif metrix == "cosine":
+            symbol = "<=>"
+        else:
+            print("Error with metrix type")
+            return
+        sim_query = f"""
+        SELECT id, embedding {symbol} (%s) AS distance
+        FROM {table_name}
+        ORDER BY distance ASC
+        LIMIT 1
+        """
+        result = self.conn.execute(sim_query, (embedding_vector,)).fetchall()
+        # print(result)
+        return result
