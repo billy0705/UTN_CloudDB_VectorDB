@@ -59,14 +59,18 @@ class QDrantInterface:
                   for i, vector in enumerate(vectors)]
         self.conn.upsert(collection_name=collection_name, points=points)
 
+    def get_rows_cnt(self, collection_name):
+        collection_info = self.conn.get_collection(collection_name)
+        return collection_info.vectors_count
 
+ 
 # test for insert single vector
 qdrant_interface = QDrantInterface(data_path='./qdrant_data')
 print("Connected to Qdrant server.")
 
 qdrant_interface.drop_table('vector_collection')
 
-qdrant_interface.create_table(collection_name='vector_collection', vector_size=5)
+qdrant_interface.create_table(collection_name='vector_collection', vector_size=1000)
 print("Collection created successfully.")
 
 # # Insert a single vector
@@ -83,6 +87,13 @@ print("Collection created successfully.")
 #     print("Vectors inserted successfully from CSV.")
 # except Exception as e:
 #     print(f"An error occurred while inserting vectors from CSV: {e}")
+
+# Get row count
+try:
+    rows_count = qdrant_interface.get_rows_cnt(collection_name='vector_collection')
+    print(f"Number of vectors in the collection: {rows_count}")
+except Exception as e:
+    print(f"An error occurred while getting the row count: {e}")
 
 qdrant_interface.disconnect_server()
 print("Disconnected from Qdrant server.")
