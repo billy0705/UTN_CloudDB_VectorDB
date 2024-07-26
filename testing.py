@@ -3,6 +3,7 @@ import pandas as pd
 import json
 
 from pgvector_interface import PGvectorInterface
+from milvus_interface import MilvusInterface
 
 
 def get_data_info(csv_path):
@@ -11,9 +12,9 @@ def get_data_info(csv_path):
     return df.shape
 
 
-test_db_interface = [PGvectorInterface]
-test_metrix = {PGvectorInterface: ["l2", "cosine"]}
-test_index_type = {PGvectorInterface: ["hnsw", "ivfflat"]}
+test_db_interface = [PGvectorInterface, MilvusInterface]
+test_metrix = {PGvectorInterface: ["l2", "cosine"], MilvusInterface: [None]}
+test_index_type = {PGvectorInterface: ["hnsw", "ivfflat"], MilvusInterface: [None]}
 db_name_dict = {PGvectorInterface: "PGvector"}
 
 name = "vector_benchmark_test"
@@ -23,7 +24,7 @@ shape = get_data_info(csv_path)
 test_csv_path = "./data/similarity_vectors.csv"
 test_vector = pd.read_csv(test_csv_path)
 test_vector = test_vector.to_numpy().flatten()
-test_round = 20
+test_round = 1
 db_benchmarks = []
 
 total_start_time = time.time()

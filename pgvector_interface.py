@@ -29,10 +29,10 @@ class PGvectorInterface:
         self.conn.commit()
         return result
 
-    def create_table(self, table_name, vector_size,
+    def create_table(self, table_name, dimention,
                      metrix=None, index_types=None):
         query = f'''CREATE TABLE IF NOT EXISTS {table_name}
-         (id bigserial PRIMARY KEY, embedding vector({vector_size}))'''
+         (id bigserial PRIMARY KEY, embedding vector({dimention}))'''
         self.conn.execute(query)
         index_flag = 0
         if index_types == "hnsw":
@@ -88,7 +88,7 @@ class PGvectorInterface:
         df = df.to_numpy()
         # print(f"{df.shape = }")
 
-        for i in range(df.shape[1]):
+        for i in range(df.shape[0]):
             vector = df[i, :]
             self.insert_single_vector(table_name, vector)
 
