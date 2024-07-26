@@ -71,7 +71,8 @@ class PGvectorInterface:
 
     def get_size_of_table(self, table_name):
         query = f"""SELECT
-         pg_total_relation_size('{table_name}')"""
+         pg_total_relation_size('{table_name}'), pg_table_size('{table_name}'), 
+         pg_indexes_size('{table_name}')"""
         result = self.conn.execute(query).fetchall()
         self.conn.commit()
         # print(result)

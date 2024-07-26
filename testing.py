@@ -16,15 +16,17 @@ test_metrix = {PGvectorInterface: ["l2", "cosine"]}
 test_index_type = {PGvectorInterface: ["hnsw", "ivfflat"]}
 db_name_dict = {PGvectorInterface: "PGvector"}
 
-name = "vector_test"
+name = "vector_benchmark_test"
 csv_path = "./data/clustered_vectors.csv"
 shape = get_data_info(csv_path)
 
 test_csv_path = "./data/similarity_vectors.csv"
 test_vector = pd.read_csv(test_csv_path)
 test_vector = test_vector.to_numpy().flatten()
-test_round = 10
+test_round = 20
 db_benchmarks = []
+
+total_start_time = time.time()
 
 for db_interface in test_db_interface:
     print(db_interface)
@@ -47,9 +49,9 @@ for db_interface in test_db_interface:
         "Methods": {}
     }
 
-    for i in range(test_round):
-        for index_type in test_index_type[db_interface]:
-            for metrix in test_metrix[db_interface]:
+    for index_type in test_index_type[db_interface]:
+        for metrix in test_metrix[db_interface]:
+            for i in range(test_round):
                 t_name = f"{index_type}+{metrix}"
                 if i == 0:
                     db_BM["Methods"][t_name] = {}
@@ -57,9 +59,10 @@ for db_interface in test_db_interface:
                     db_BM["Methods"][t_name]["insert_time"] = 0
                     db_BM["Methods"][t_name]["similarity_time"] = 0
                     db_BM["Methods"][t_name]["size"] = 0
-                print("#"*40)
-                print(f"{db_name_dict[db_interface]}")
-                print(f"{index_type = } and {metrix = }")
+                    print("#"*40)
+                    print(f"{db_name_dict[db_interface]}")
+                    print(f"{index_type = } and {metrix = }")
+                print(f"Round {i+1} start")
 
                 db.drop_table(name)
                 # print(index_type, metrix)
@@ -89,15 +92,12 @@ for db_interface in test_db_interface:
 
                 # others ...
 
-                # print result
-                # print(f"Creating table time: {create_time}")
-                # print(f"Inserting data time: {insert_time}")
-                # print(f"Similarity search time (100 times): {search_time}")
-                # print(f"Size of table: {size}")
+                # print results
 
     print(db_BM)
     db_benchmarks.append(db_BM.copy())
 
+print(f"Total process time: {time.time() - total_start_time}")
 
 with open("./result.json", 'w', encoding='utf-8') as f:
     json.dump(db_benchmarks, f, ensure_ascii=False, indent=4)
