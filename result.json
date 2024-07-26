@@ -1,35 +1,69 @@
 [
     {
+        "Name": "Milvus",
+        "Data-info": {
+            "#vector": 10000,
+            "dimension": 1000
+        },
+        "Test round": 1,
+        "Methods": {
+            "HNSW+L2": {
+                "create_time": 1.0179038047790527,
+                "insert_time": 0.689136266708374,
+                "similarity_time": 0.10511302947998047,
+                "size": 0
+            },
+            "HNSW+COSINE": {
+                "create_time": 1.0162487030029297,
+                "insert_time": 0.6843891143798828,
+                "similarity_time": 0.0013382434844970703,
+                "size": 0
+            },
+            "FLAT+L2": {
+                "create_time": 1.0271592140197754,
+                "insert_time": 0.661754846572876,
+                "similarity_time": 0.0015439987182617188,
+                "size": 0
+            },
+            "FLAT+COSINE": {
+                "create_time": 1.0264389514923096,
+                "insert_time": 0.6096351146697998,
+                "similarity_time": 0.0013496875762939453,
+                "size": 0
+            }
+        }
+    },
+    {
         "Name": "PGvector",
         "Data-info": {
             "#vector": 10000,
             "dimension": 1000
         },
-        "Test round": 20,
+        "Test round": 1,
         "Methods": {
             "hnsw+l2": {
-                "create_time": 0.12059545516967773,
-                "insert_time": 263.74237632751465,
-                "similarity_time": 0.1109168529510498,
-                "size": 278233088
+                "create_time": 0.006939888000488281,
+                "insert_time": 214.40273094177246,
+                "similarity_time": 0.11614274978637695,
+                "size": 138158080
             },
             "hnsw+cosine": {
-                "create_time": 0.10552406311035156,
-                "insert_time": 248.10106015205383,
-                "similarity_time": 0.11320686340332031,
-                "size": 278216704
+                "create_time": 0.01831197738647461,
+                "insert_time": 211.25178623199463,
+                "similarity_time": 0.08328104019165039,
+                "size": 138158080
             },
             "ivfflat+l2": {
-                "create_time": 0.10056400299072266,
-                "insert_time": 245.94992208480835,
-                "similarity_time": 0.10931038856506348,
-                "size": 278216704
+                "create_time": 0.015608072280883789,
+                "insert_time": 215.48615717887878,
+                "similarity_time": 0.09757590293884277,
+                "size": 138158080
             },
             "ivfflat+cosine": {
-                "create_time": 0.1269066333770752,
-                "insert_time": 245.9184067249298,
-                "similarity_time": 0.10888171195983887,
-                "size": 278224896
+                "create_time": 0.017084836959838867,
+                "insert_time": 214.14304614067078,
+                "similarity_time": 0.06167292594909668,
+                "size": 138158080
             }
         }
     }

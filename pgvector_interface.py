@@ -83,9 +83,13 @@ class PGvectorInterface:
         self.conn.execute(query, (vector,))
         self.conn.commit()
 
-    def insert_vector_from_csv(self, table_name, csv_path):
+    def transfer_csv(self, csv_path):
         df = pd.read_csv(csv_path)
         df = df.to_numpy()
+        return df
+
+    def insert_vector_from_csv(self, table_name, df):
+        
         # print(f"{df.shape = }")
 
         for i in range(df.shape[0]):

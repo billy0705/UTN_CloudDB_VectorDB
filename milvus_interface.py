@@ -1,8 +1,9 @@
 # pip install pymilvus milvus sentence-transformers
 # import numpy as np
 import pandas as pd
+import json
 # from milvus import default_server
-from pymilvus import MilvusClient, connections, utility, FieldSchema, CollectionSchema, DataType, Collection, db
+from pymilvus import MilvusClient, connections
 # from time import time
 
 
@@ -14,39 +15,36 @@ class MilvusInterface:
         pass
 
     def connect_server(self):
-        # self.conn = psycopg.connect(
-        #     f"dbname={self.dbname} user={self.user} password={self.password}"
-        # )
-        # self.conn.execute('CREATE EXTENSION IF NOT EXISTS vector')
-        # register_vector(self.conn)
-        # conn = connections.connect(host="127.0.0.1", port=19530)
-        # database = db.create_database("my_database")
         self.client = MilvusClient(self.db_path)
 
     def disconnect_server(self):
         self.client.close()
         pass
 
-    def execute_query(self, query):
-        # result = self.conn.execute(query).fetchall()
-        # self.conn.commit()
-        # return result
-        pass
-
     def create_table(self, name, dimention, metrix=None, index_types=None):
-        # query = f'''CREATE TABLE IF NOT EXISTS {table_name}
-        #  (id bigserial PRIMARY KEY, embedding vector({vector_size}))'''
-        # self.conn.execute(query)
-        # self.conn.commit()
         if self.client.has_collection(name):
             res = self.client.describe_collection(
                 collection_name=name
             )
             print(res)
         else:
+            index_params = self.client.prepare_index_params()
+            index_params.add_index(
+                field_name="vector",
+                metric_type=metrix,
+                index_type=index_types,
+                index_name="vector_index",
+                params={"nlist": 128}
+            )
+
             self.client.create_collection(
                 collection_name=name,
                 dimension=dimention
+            )
+
+            self.client.create_index(
+                collection_name=name,
+                index_params=index_params
             )
         pass
 
@@ -96,20 +94,13 @@ class MilvusInterface:
         return res['row_count']
         pass
 
-    def similarity_search(self, table_name, embedding_vector, metrix):
-        # if metrix == "l2":
-        #     symbol = "<->"
-        # elif metrix == "cosine":
-        #     symbol = "<=>"
-        # else:
-        #     print("Error with metrix type")
-        #     return
-        # sim_query = f"""
-        # SELECT id, embedding {symbol} (%s) AS distance
-        # FROM {table_name}
-        # ORDER BY distance ASC
-        # LIMIT 1
-        # """
-        # result = self.conn.execute(sim_query, (embedding_vector,)).fetchall()
+    def similarity_search(self, name, embedding_vector, metrix=None):
+        res = self.client.search(
+            collection_name=name,
+            data=[embedding_vector.tolist()],
+            limit=1,
+            search_params={"metric_type": metrix, "params": {}}
+        )
+        result = json.dumps(res, indent=4)
         # print(result)
-        # return result
+        return result

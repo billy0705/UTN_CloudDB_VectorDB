@@ -12,10 +12,10 @@ def get_data_info(csv_path):
     return df.shape
 
 
-test_db_interface = [PGvectorInterface, MilvusInterface]
-test_metrix = {PGvectorInterface: ["l2", "cosine"], MilvusInterface: [None]}
-test_index_type = {PGvectorInterface: ["hnsw", "ivfflat"], MilvusInterface: [None]}
-db_name_dict = {PGvectorInterface: "PGvector"}
+test_db_interface = [MilvusInterface, PGvectorInterface]  # [PGvectorInterface, MilvusInterface]
+test_metrix = {PGvectorInterface: ["l2", "cosine"], MilvusInterface: ["L2", "COSINE"]}
+test_index_type = {PGvectorInterface: ["hnsw", "ivfflat"], MilvusInterface: ["HNSW", "FLAT"]}
+db_name_dict = {PGvectorInterface: "PGvector", MilvusInterface: "Milvus"}
 
 name = "vector_benchmark_test"
 csv_path = "./data/clustered_vectors.csv"
@@ -30,9 +30,11 @@ db_benchmarks = []
 total_start_time = time.time()
 
 for db_interface in test_db_interface:
-    print(db_interface)
+    print(db_name_dict[db_interface])
     if db_interface == PGvectorInterface:
         db = db_interface('postgres', 'billyslim')
+    elif db_interface == MilvusInterface:
+        db = db_interface('milvus_db/milvus_demo.db')
     else:
         pass
 
@@ -75,9 +77,11 @@ for db_interface in test_db_interface:
                 db_BM["Methods"][t_name]["create_time"] += (time.time() -
                                                             start_time)
 
+                # prepare data
+                data = db.transfer_csv(csv_path)
                 # insert data
                 start_time = time.time()
-                db.insert_vector_from_csv(name, csv_path)
+                db.insert_vector_from_csv(name, data)
                 db_BM["Methods"][t_name]["insert_time"] += (time.time() -
                                                             start_time)
 
