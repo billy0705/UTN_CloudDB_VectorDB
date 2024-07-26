@@ -52,19 +52,23 @@ class QDrantInterface:
             points=[PointStruct(id=1, vector=vector.tolist())]
         )
 
-    def insert_vector_from_csv(self, collection_name, csv_path):
+    def transfer_csv(self, csv_path):
         df = pd.read_csv(csv_path)
         vectors = df.to_numpy()
-        points = [PointStruct(id=i, vector=vector.tolist())
-                  for i, vector in enumerate(vectors)]
+        data = [PointStruct(id=i, vector=vector.tolist())
+                for i, vector in enumerate(vectors)]
+        return data
+
+    def insert_vector_from_csv(self, collection_name, points):
+        
         self.conn.upsert(collection_name=collection_name, points=points)
 
     def get_rows_cnt(self, collection_name):
         collection_info = self.conn.get_collection(collection_name)
         return collection_info.vectors_count
 
- 
-# test for insert single vector
+
+# testing
 qdrant_interface = QDrantInterface(data_path='./qdrant_data')
 print("Connected to Qdrant server.")
 
