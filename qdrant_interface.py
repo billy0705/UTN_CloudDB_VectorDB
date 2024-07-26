@@ -1,7 +1,9 @@
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Filter, SearchParams, SearchRequest
-from qdrant_client.http.models import VectorParams, Distance
+from qdrant_client.http.models import VectorParams, Distance, PointStruct
 import os
+import pandas as pd
+import numpy as np
 
 
 class QDrantInterface:
@@ -15,7 +17,7 @@ class QDrantInterface:
         self.conn = QdrantClient(path=self.data_path)
 
     def disconnect_server(self):
-        self.conn = None
+        self.conn = self.conn.close()
 
     def create_table(self, collection_name, vector_size, metrix=None):
         self.conn.create_collection(
@@ -38,46 +40,49 @@ class QDrantInterface:
         return total_size
 
     def get_size_of_table(self, collection_name):
-        qdrant_data_size = self._get_directory_size(f'{self.data_path}/collection/{collection_name}')
+        qdrant_data_size = self._get_directory_size(
+            f'{self.data_path}/collection/{collection_name}')
         print(f"Size of data in Qdrant: {qdrant_data_size} bytes")
         print(qdrant_data_size)
         return qdrant_data_size
 
-    def insert_single_vector(self, table_name, vector):
-        query = f'INSERT INTO {table_name} (embedding) VALUES (%s)'
-        self.conn.execute(query, (vector,))
-        self.conn.commit()
+    def insert_single_vector(self, collection_name, vector):
+        self.conn.upsert(
+            collection_name=collection_name,
+            points=[PointStruct(id=1, vector=vector.tolist())]
+        )
 
-    def insert_vector_from_csv(self, table_name, csv_path):
+    def insert_vector_from_csv(self, collection_name, csv_path):
         df = pd.read_csv(csv_path)
-        df = df.to_numpy()
-        print(f"{df.shape = }")
+        vectors = df.to_numpy()
+        points = [PointStruct(id=i, vector=vector.tolist())
+                  for i, vector in enumerate(vectors)]
+        self.conn.upsert(collection_name=collection_name, points=points)
 
-        for i in range(df.shape[1]):
-            vector = df[i, :]
-            self.insert_single_vector(table_name, vector)
 
-    def get_rows_cnt(self, table_name):
-        query = f'SELECT COUNT(*) FROM {table_name}'
-        result = self.conn.execute(query).fetchall()
-        # print(result)
-        self.conn.commit()
-        return result[0][0]
-    
-    def similarity_search(self, table_name, embedding_vector, metrix):
-        if metrix == "l2":
-            symbol = "<->"
-        elif metrix == "cosine":
-            symbol = "<=>"
-        else:
-            print("Error with metrix type")
-            return
-        sim_query = f"""
-        SELECT id, embedding {symbol} (%s) AS distance
-        FROM {table_name}
-        ORDER BY distance ASC
-        LIMIT 5
-        """
-        result = self.conn.execute(sim_query, (embedding_vector,)).fetchall()
-        # print(result)
-        return result
+# test for insert single vector
+qdrant_interface = QDrantInterface(data_path='./qdrant_data')
+print("Connected to Qdrant server.")
+
+qdrant_interface.drop_table('vector_collection')
+
+qdrant_interface.create_table(collection_name='vector_collection', vector_size=5)
+print("Collection created successfully.")
+
+# # Insert a single vector
+# try:
+#     sample_vector = np.array([0.1, 0.2, 0.3, 0.4, 0.5])
+#     qdrant_interface.insert_single_vector(collection_name='vector_collection', vector=sample_vector)
+#     print("Vector inserted successfully.")
+# except Exception as e:
+#     print(f"An error occurred while inserting the vector: {e}")
+
+# # Insert vectors from CSV
+# try:
+#     qdrant_interface.insert_vector_from_csv(collection_name='vector_collection', csv_path='./data/clustered_vectors.csv')
+#     print("Vectors inserted successfully from CSV.")
+# except Exception as e:
+#     print(f"An error occurred while inserting vectors from CSV: {e}")
+
+qdrant_interface.disconnect_server()
+print("Disconnected from Qdrant server.")
