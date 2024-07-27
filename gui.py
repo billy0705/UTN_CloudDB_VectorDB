@@ -60,7 +60,7 @@ class MainWindow(QMainWindow):
                 dataset_button.setChecked(False)  # Initially unchecked
                 dataset_button.clicked.connect(lambda _, m=metric, d=dataset, btn=dataset_button: self.updatePlot(m, d, btn))
                 button_layout.addWidget(dataset_button)
-                if j == 0:
+                if i == 0 and j == 0:
                     default_dataset = dataset
                     first_plot_button = dataset_button
                     first_metric_layout = metric_layout  # Track the correct layout for the first plot
@@ -68,9 +68,8 @@ class MainWindow(QMainWindow):
             metric_layout.addLayout(button_layout)
             fig = get_plot_figure(metric, default_dataset)
             plot_canvas = PlotCanvas(scrollContent, figure=fig, width=12, height=8)
-            metric_layout.addWidget(plot_canvas)
             plot_canvas.setVisible(False)  # Initially hidden
-
+            metric_layout.addWidget(plot_canvas)
             self.scrollLayout.addLayout(metric_layout)
 
         first_plot_button.setChecked(True)
