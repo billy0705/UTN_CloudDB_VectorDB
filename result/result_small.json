@@ -11,13 +11,13 @@
         },
         "Test round": 1,
         "Methods": {
-            "HNSW+Cosine": {
+            "HNSW+COSINE": {
                 "create_time": 0.00573420524597168,
                 "insert_time": 1.1406610012054443,
                 "similarity_time": 0.4016151428222656,
                 "size": 9510912
             },
-            "HNSW+Euclid": {
+            "HNSW+L2": {
                 "create_time": 0.002279043197631836,
                 "insert_time": 1.2846179008483887,
                 "similarity_time": 0.36502504348754883,
@@ -75,25 +75,25 @@
         },
         "Test round": 1,
         "Methods": {
-            "hnsw+l2": {
+            "HNSW+L2": {
                 "create_time": 0.008661985397338867,
                 "insert_time": 10.241976022720337,
                 "similarity_time": 0.711590051651001,
                 "size": 13910016
             },
-            "hnsw+cosine": {
+            "HNSW+COSINE": {
                 "create_time": 0.0049211978912353516,
                 "insert_time": 9.525593042373657,
                 "similarity_time": 0.5119879245758057,
                 "size": 13910016
             },
-            "ivfflat+l2": {
+            "FLAT+L2": {
                 "create_time": 0.05108904838562012,
                 "insert_time": 0.36103391647338867,
                 "similarity_time": 0.03067779541015625,
                 "size": 10854400
             },
-            "ivfflat+cosine": {
+            "FLAT+COSINE": {
                 "create_time": 0.018906116485595703,
                 "insert_time": 0.3922841548919678,
                 "similarity_time": 0.0348970890045166,
