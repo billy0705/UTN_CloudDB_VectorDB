@@ -60,13 +60,22 @@ class QDrantInterface:
         return data
 
     def insert_vector_from_csv(self, collection_name, points):
-        
         self.conn.upsert(collection_name=collection_name, points=points)
 
     def get_rows_cnt(self, collection_name):
         collection_info = self.conn.get_collection(collection_name)
         return collection_info.vectors_count
 
+    def similarity_search(self, collection_name, embedding_vector, metric='Cosine', limit=5):
+        # Perform the search
+        res = self.conn.search(
+            collection_name=collection_name,
+            query_vector=embedding_vector,
+            limit=limit,
+            search_params={"distance": metric}
+        )
+        result = [{"id": match.id, "score": match.score} for match in res]
+        return result
 
 # testing
 qdrant_interface = QDrantInterface(data_path='./qdrant_data')
@@ -85,12 +94,13 @@ print("Collection created successfully.")
 # except Exception as e:
 #     print(f"An error occurred while inserting the vector: {e}")
 
-# # Insert vectors from CSV
-# try:
-#     qdrant_interface.insert_vector_from_csv(collection_name='vector_collection', csv_path='./data/clustered_vectors.csv')
-#     print("Vectors inserted successfully from CSV.")
-# except Exception as e:
-#     print(f"An error occurred while inserting vectors from CSV: {e}")
+# Insert vectors from CSV
+try:
+    points = qdrant_interface.transfer_csv('./data/clustered_vectors.csv')
+    qdrant_interface.insert_vector_from_csv(collection_name='vector_collection', points=points)
+    print("Vectors inserted successfully from CSV.")
+except Exception as e:
+    print(f"An error occurred while inserting vectors from CSV: {e}")
 
 # Get row count
 try:
@@ -98,6 +108,13 @@ try:
     print(f"Number of vectors in the collection: {rows_count}")
 except Exception as e:
     print(f"An error occurred while getting the row count: {e}")
+
+try:
+    sample_vector = [0.1, 0.2, 0.3, 0.4, 0.5] * 200  # Adjusted to match 1000 dimensions
+    search_result = qdrant_interface.similarity_search(collection_name='vector_collection', embedding_vector=sample_vector, metric='cosine', limit=5)
+    print(f"Similarity search result: {search_result}")
+except Exception as e:
+    print(f"An error occurred during similarity search: {e}")
 
 qdrant_interface.disconnect_server()
 print("Disconnected from Qdrant server.")
