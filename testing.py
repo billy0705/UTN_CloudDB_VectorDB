@@ -32,9 +32,9 @@ db_name_dict = {
 }
 
 
-def benchmark_test(i, index_type, metrix, db_BM,
+def benchmark_test(i, index_type: str, metrix: str, db_BM,
                    db, collection_name, csv_path, test_vector):
-    t_name = f"{index_type}+{metrix}"
+    t_name = f"{index_type.upper()}+{metrix.upper()}"
     if i == 0:
         db_BM["Methods"][t_name] = {}
         db_BM["Methods"][t_name]["create_time"] = 0

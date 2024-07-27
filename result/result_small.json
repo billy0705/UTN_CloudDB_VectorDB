@@ -87,13 +87,13 @@
                 "similarity_time": 0.5119879245758057,
                 "size": 13910016
             },
-            "FLAT+L2": {
+            "IVFFLAT+L2": {
                 "create_time": 0.05108904838562012,
                 "insert_time": 0.36103391647338867,
                 "similarity_time": 0.03067779541015625,
                 "size": 10854400
             },
-            "FLAT+COSINE": {
+            "IVFFLAT+COSINE": {
                 "create_time": 0.018906116485595703,
                 "insert_time": 0.3922841548919678,
                 "similarity_time": 0.0348970890045166,
