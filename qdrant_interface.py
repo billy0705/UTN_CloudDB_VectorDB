@@ -1,9 +1,11 @@
 from qdrant_client import QdrantClient
+import qdrant_client
 # from qdrant_client.http.models import Filter, SearchParams, SearchRequest
-from qdrant_client.http.models import VectorParams, Distance, PointStruct
+from qdrant_client.http.models import VectorParams, Distance, PointStruct, HnswConfig
 import os
 import pandas as pd
 # import numpy as np
+import json
 
 
 class QDrantInterface:
@@ -21,10 +23,17 @@ class QDrantInterface:
 
     def create_table(self, collection_name, vector_size, metrix=None,
                      index_types=None):
+        if index_types is not None:
+            index_config = HnswConfig(
+                m=16,  # Maximum number of edges per node in HNSW graph
+                ef_construct=200,  # Size of dynamic list for nearest neighbors during graph construction
+                full_scan_threshold=10000
+            )
         self.conn.create_collection(
             collection_name=collection_name,
             vectors_config=VectorParams(size=vector_size,
                                         distance=Distance.COSINE),
+            hnsw_config=index_config
         )
 
     def drop_table(self, collection_name):
@@ -65,11 +74,12 @@ class QDrantInterface:
 
     def get_rows_cnt(self, collection_name):
         collection_info = self.conn.get_collection(collection_name)
-        return collection_info['result']['vectors_count']
+        print(collection_info)
+        # result = json.dumps(collection_info, indent=4)
+        return collection_info.points_count
 
     def similarity_search(self, collection_name, embedding_vector,
                           metric='Cosine', limit=5):
-        # Perform the search
         res = self.conn.search(
             collection_name=collection_name,
             query_vector=embedding_vector,
