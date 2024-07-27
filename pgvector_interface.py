@@ -57,7 +57,7 @@ class PGvectorInterface:
         if index_flag == 1:
             index_query = f"""
             CREATE INDEX ON {table_name}
-            USING hnsw (embedding {metrix_name})"""
+            USING {index_types} (embedding {metrix_name})"""
             self.conn.execute(index_query)
             # print("create index")
         else:
@@ -85,16 +85,32 @@ class PGvectorInterface:
 
     def transfer_csv(self, csv_path):
         df = pd.read_csv(csv_path)
-        df = df.to_numpy()
-        return df
+        data = df.to_numpy()
+        data = [data[i, :] for i in range(data.shape[0])]
+        return data
 
-    def insert_vector_from_csv(self, table_name, df):
-        
+    def insert_vector_from_csv(self, table_name, data):
+
         # print(f"{df.shape = }")
+        # print(len(data))
+        # print(data[0])
+        query = f'INSERT INTO {table_name} (embedding) VALUES (%s)'
+        for vector in data:
+            self.conn.execute(query, (vector,))
+        self.conn.commit()
 
-        for i in range(df.shape[0]):
-            vector = df[i, :]
-            self.insert_single_vector(table_name, vector)
+    def indexing_data(self, table_name, metrix, index_types):
+        if metrix == 'l2':
+            metrix_name = "vector_l2_ops"
+        elif metrix == 'cosine':
+            metrix_name = "vector_cosine_ops"
+        else:
+            return
+        index_query = f"""
+        CREATE INDEX ON {table_name}
+        USING {index_types} (embedding {metrix_name})"""
+        self.conn.execute(index_query)
+        self.conn.commit()
 
     def get_rows_cnt(self, table_name):
         query = f'SELECT COUNT(*) FROM {table_name}'

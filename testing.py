@@ -14,6 +14,7 @@ def get_data_info(csv_path):
 
 
 test_db_interface = [QDrantInterface, MilvusInterface, PGvectorInterface]
+# test_db_interface = [PGvectorInterface]
 test_metrix = {
     PGvectorInterface: ["l2", "cosine"],
     MilvusInterface: ["L2", "COSINE"],
@@ -59,6 +60,8 @@ def benchmark_test(i, index_type, metrix, db_BM,
     db.insert_vector_from_csv(collection_name, data)
     db_BM["Methods"][t_name]["insert_time"] += (time.time() -
                                                 start_time)
+
+    # db.indexing_data(collection_name, metrix, index_type)
 
     # size of table
     db_BM["Methods"][t_name]["size"] += db.get_size_of_table(
@@ -143,15 +146,20 @@ def Benchmark(
 
         for index_type in test_index_type[db_interface]:
             for metrix in test_metrix[db_interface]:
+                # if db_interface == PGvectorInterface:
+                #     if index_type == "hnsw":
+                #         if metrix == "l2":
+                #             continue
                 for i in range(test_round):
                     round_strat_time = time.time()
                     print("#"*40)
                     print(f"{db_name_dict[db_interface]}")
                     print(f"{index_type = } and {metrix = }")
+
                     db_BM = benchmark_test(i, index_type, metrix,
-                                           db_BM,
-                                           db, collection_name,
+                                           db_BM, db, collection_name,
                                            csv_path, test_vector)
+                    
                     print(f"Round {i+1} spent {time.time()-round_strat_time}")
 
         db.drop_table(collection_name)
@@ -169,7 +177,7 @@ def Benchmark(
 
 
 if __name__ == "__main__":
-    csv_path = "./data/clustered_vectors_small.csv"
+    csv_path = "./data/clustered_vectors.csv"
     test_csv_path = "./data/clustered_vectors_test.csv"
-    result_file = "./result/result_small.json"
+    result_file = "./result/result.json"
     Benchmark(csv_path, test_csv_path, result_file=result_file)

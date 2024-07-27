@@ -12,15 +12,15 @@
         "Test round": 1,
         "Methods": {
             "HNSW+Cosine": {
-                "create_time": 0.004453897476196289,
-                "insert_time": 0.9789843559265137,
-                "similarity_time": 0.3531479835510254,
+                "create_time": 0.00573420524597168,
+                "insert_time": 1.1406610012054443,
+                "similarity_time": 0.4016151428222656,
                 "size": 9510912
             },
             "HNSW+Euclid": {
-                "create_time": 0.0019719600677490234,
-                "insert_time": 1.0403079986572266,
-                "similarity_time": 0.3593101501464844,
+                "create_time": 0.002279043197631836,
+                "insert_time": 1.2846179008483887,
+                "similarity_time": 0.36502504348754883,
                 "size": 9510912
             }
         }
@@ -38,27 +38,27 @@
         "Test round": 1,
         "Methods": {
             "HNSW+L2": {
-                "create_time": 1.0289931297302246,
-                "insert_time": 0.7595226764678955,
-                "similarity_time": 0.33988404273986816,
+                "create_time": 1.0243420600891113,
+                "insert_time": 0.8517758846282959,
+                "similarity_time": 0.4519381523132324,
                 "size": 0
             },
             "HNSW+COSINE": {
-                "create_time": 1.022383213043213,
-                "insert_time": 0.6440610885620117,
-                "similarity_time": 0.11446380615234375,
+                "create_time": 1.028515100479126,
+                "insert_time": 0.804358959197998,
+                "similarity_time": 0.19748306274414062,
                 "size": 0
             },
             "FLAT+L2": {
-                "create_time": 1.022770881652832,
-                "insert_time": 0.7149429321289062,
-                "similarity_time": 0.11062788963317871,
+                "create_time": 1.0187108516693115,
+                "insert_time": 0.8655717372894287,
+                "similarity_time": 0.10862398147583008,
                 "size": 0
             },
             "FLAT+COSINE": {
-                "create_time": 1.0237560272216797,
-                "insert_time": 0.7078661918640137,
-                "similarity_time": 0.10508298873901367,
+                "create_time": 1.0223619937896729,
+                "insert_time": 0.71738600730896,
+                "similarity_time": 0.11655902862548828,
                 "size": 0
             }
         }
@@ -76,28 +76,28 @@
         "Test round": 1,
         "Methods": {
             "hnsw+l2": {
-                "create_time": 0.019699811935424805,
-                "insert_time": 10.622328042984009,
-                "similarity_time": 0.5029728412628174,
+                "create_time": 0.008661985397338867,
+                "insert_time": 10.241976022720337,
+                "similarity_time": 0.711590051651001,
                 "size": 13910016
             },
             "hnsw+cosine": {
-                "create_time": 0.003996133804321289,
-                "insert_time": 10.303364753723145,
-                "similarity_time": 0.5016021728515625,
+                "create_time": 0.0049211978912353516,
+                "insert_time": 9.525593042373657,
+                "similarity_time": 0.5119879245758057,
                 "size": 13910016
             },
             "ivfflat+l2": {
-                "create_time": 0.004574775695800781,
-                "insert_time": 10.474450826644897,
-                "similarity_time": 0.5268850326538086,
-                "size": 13910016
+                "create_time": 0.05108904838562012,
+                "insert_time": 0.36103391647338867,
+                "similarity_time": 0.03067779541015625,
+                "size": 10854400
             },
             "ivfflat+cosine": {
-                "create_time": 0.00925898551940918,
-                "insert_time": 10.361266851425171,
-                "similarity_time": 0.5064969062805176,
-                "size": 13918208
+                "create_time": 0.018906116485595703,
+                "insert_time": 0.3922841548919678,
+                "similarity_time": 0.0348970890045166,
+                "size": 10821632
             }
         }
     }
