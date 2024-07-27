@@ -4,6 +4,7 @@ import json
 
 from pgvector_interface import PGvectorInterface
 from milvus_interface import MilvusInterface
+from qdrant_interface import QDrantInterface
 
 
 def get_data_info(csv_path):
@@ -12,18 +13,21 @@ def get_data_info(csv_path):
     return df.shape
 
 
-test_db_interface = [MilvusInterface, PGvectorInterface]
+test_db_interface = [QDrantInterface, MilvusInterface, PGvectorInterface]
 test_metrix = {
     PGvectorInterface: ["l2", "cosine"],
-    MilvusInterface: ["L2", "COSINE"]
+    MilvusInterface: ["L2", "COSINE"],
+    QDrantInterface: ["Cosine", "Euclid"]
 }
 test_index_type = {
     PGvectorInterface: ["hnsw", "ivfflat"],
-    MilvusInterface: ["HNSW", "FLAT"]
+    MilvusInterface: ["HNSW", "FLAT"],
+    QDrantInterface: ["HNSW"]
 }
 db_name_dict = {
     PGvectorInterface: "PGvector",
-    MilvusInterface: "Milvus"
+    MilvusInterface: "Milvus",
+    QDrantInterface: "QDrant"
 }
 
 
@@ -43,7 +47,7 @@ def benchmark_test(i, index_type, metrix, db_BM,
 
     # create table
     start_time = time.time()
-    db.create_table(collection_name, 1000, metrix=metrix,
+    db.create_table(collection_name, test_vector.shape[1], metrix=metrix,
                     index_types=index_type)
     db_BM["Methods"][t_name]["create_time"] += (time.time() -
                                                 start_time)
@@ -89,7 +93,8 @@ def Benchmark(
     pg_dbname='postgres',
     pg_username='billyslim',
     pg_password='',
-    milvus_db_path='milvus_db/milvus_demo.db'
+    milvus_db_path='milvus_db/milvus_demo.db',
+    qdrant_db_path='./qdrant_data'
 ):
     train_data_shape = get_data_info(csv_path)
     test_data_shape = get_data_info(test_csv_path)
@@ -100,6 +105,7 @@ def Benchmark(
     print("Start Benchmark process")
     print("#"*40)
     print("Informaton of dataset")
+    assert train_data_shape[1] == test_data_shape[1]
 
     print(f"""Training dataset:
     # vector = {train_data_shape[0]}
@@ -116,6 +122,8 @@ def Benchmark(
             db = db_interface(pg_dbname, pg_username)
         elif db_interface == MilvusInterface:
             db = db_interface(milvus_db_path)
+        elif db_interface == QDrantInterface:
+            db = db_interface(qdrant_db_path)
         else:
             continue
 
