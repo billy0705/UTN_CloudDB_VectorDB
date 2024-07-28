@@ -436,8 +436,10 @@ class MainWindow(QMainWindow):
         self.result_folder_path.setText(path)
 
     def runTests(self):
-        for checkbox, dataset_file in zip(
-             self.dataset_checkboxes, self.datasets_files):
+        new_dataset_names = []
+        new_dataset_results = []
+        for checkbox,dataset_name, dataset_file in zip(
+             self.dataset_checkboxes, self.dataset_names, self.datasets_files):
             if checkbox.isChecked():
                 test_csv_path = dataset_file.replace("data.csv", "test.csv")
                 result_file = f"{self.result_folder_path.text()}/" +\
@@ -459,9 +461,10 @@ class MainWindow(QMainWindow):
                     pg_username=pgusername, pg_password=pgpassword,
                     milvus_db_path=milvusdb_path, qdrant_db_path=qdrantdb_path
                 )
-                if result_file not in self.datasets_result_files:
-                    self.datasets_result_files.append(result_file)
-                    
+                new_dataset_names.append(dataset_name)
+                new_dataset_results.append(result_file)
+        self.datasets_result_files = new_dataset_results
+        self.dataset_names = new_dataset_names
         # Clear the existing layout of Tab 1 before reinitializing it
         self.clearLayout(self.scrollLayout)
         self.initTab1Content()
