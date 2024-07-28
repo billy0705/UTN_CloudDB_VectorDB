@@ -1,6 +1,6 @@
 # Create it for the dataset benchmark
 
-import numpy as np 
+import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 import pyarrow as pa
@@ -15,7 +15,8 @@ def generate_dataset(num_vectors, num_dimensions, folder_path,
     if cluster:
         num_clusters = 3
         cluster_cen = np.random.rand(num_clusters, num_dimensions)
-        # assign each vector to a cluster and create an arraty for the clustered vectors
+        # assign each vector to a cluster and create
+        # an arraty for the clustered vectors
         clustered_vectors = np.zeros((num_vectors, num_dimensions))
         test_clustered_vectors = np.zeros((num_test, num_dimensions))
         # assign vectors to clusters
@@ -25,12 +26,20 @@ def generate_dataset(num_vectors, num_dimensions, folder_path,
             sigma = np.random.rand(num_dimensions)*0.5
             num_points = int(num_vectors*0.9/num_clusters)
             num_test_points = int(num_test*0.9/num_clusters)
-            clustered_vectors[last:num_points + last, :] = np.random.normal(cluster_cen[i], sigma, size=(num_points, num_dimensions))
-            test_clustered_vectors[last_test:num_test_points + last_test, :] = np.random.normal(cluster_cen[i], sigma, size=(num_test_points, num_dimensions))
+            clustered_vectors[last:num_points + last, :] =\
+                np.random.normal(cluster_cen[i], sigma,
+                                 size=(num_points, num_dimensions))
+            normal_data = np.random.normal(
+                cluster_cen[i], sigma, size=(num_test_points, num_dimensions))
+            test_clustered_vectors[
+                last_test:num_test_points + last_test, :] = normal_data
             last += num_points
             last_test += num_test_points
-        clustered_vectors[last:last + num_vectors, :] = np.random.rand(num_vectors-last, num_dimensions)
-        test_clustered_vectors[last_test:last_test + num_test, :] = np.random.rand(num_test-last_test, num_dimensions)
+        random_data = np.random.rand(num_vectors-last, num_dimensions)
+        clustered_vectors[last:last + num_vectors, :] = random_data
+        random_test_data = np.random.rand(num_test-last_test, num_dimensions)
+        test_clustered_vectors[
+            last_test:last_test + num_test, :] = random_test_data
         # Shuffle the clustered vectors
         np.random.shuffle(clustered_vectors)
         np.random.shuffle(test_clustered_vectors)

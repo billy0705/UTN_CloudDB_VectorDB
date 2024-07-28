@@ -1,14 +1,18 @@
 import sys
+import os
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QTabWidget,
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QLineEdit, QFileDialog, QCheckBox,
-    QScrollArea, QLabel)
+    QScrollArea, QLabel, QSpinBox)
+from PyQt5.QtCore import Qt
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas)
 import matplotlib.pyplot as plt
 from plotting import get_plot_figure
 from testing import Benchmark
+from data_generation import generate_dataset
+import pandas as pd
 
 
 class PlotCanvas(FigureCanvas):
@@ -19,6 +23,21 @@ class PlotCanvas(FigureCanvas):
             fig = figure
         super().__init__(fig)
         self.setParent(parent)
+
+
+class PlotData(FigureCanvas):
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        self.fig, self.ax = plt.subplots(figsize=(width, height), dpi=dpi)
+        super().__init__(self.fig)
+        self.setParent(parent)
+
+    def plot(self, data, x_index=0, y_index=1, num_samples=100):
+        self.ax.clear()
+        sampled_data = data.sample(n=num_samples)
+        self.ax.scatter(sampled_data.iloc[:, x_index], sampled_data.iloc[:, y_index])
+        self.ax.set_xlabel(f"Dimension {x_index}")
+        self.ax.set_ylabel(f"Dimension {y_index}")
+        self.draw()
 
 
 class MainWindow(QMainWindow):
@@ -108,33 +127,138 @@ class MainWindow(QMainWindow):
     def initTab2(self):
         layout = QVBoxLayout()
 
+        # Dataset Name
+        hbox_name = QHBoxLayout()
         self.dataset_name = QLineEdit()
         self.dataset_name.setPlaceholderText("Dataset Name")
-        layout.addWidget(self.dataset_name)
+        hbox_name.addWidget(QLabel("Dataset Name:"))
+        hbox_name.addWidget(self.dataset_name)
+        layout.addLayout(hbox_name)
 
+        # Dataset Path
+        hbox_path = QHBoxLayout()
         self.dataset_path = QLineEdit()
         self.dataset_path.setPlaceholderText("Dataset Path")
         browse_button = QPushButton("Browse")
         browse_button.clicked.connect(self.browsePath)
-        layout.addWidget(self.dataset_path)
-        layout.addWidget(browse_button)
+        hbox_path.addWidget(QLabel("Dataset Path:"))
+        hbox_path.addWidget(self.dataset_path)
+        hbox_path.addWidget(browse_button)
+        layout.addLayout(hbox_path)
 
-        self.num_rows = QLineEdit()
-        self.num_rows.setPlaceholderText("Number of Rows")
-        layout.addWidget(self.num_rows)
+        # Number of Rows
+        self.num_rows = QLineEdit("1000")
+        hbox_rows = QHBoxLayout()
+        hbox_rows.addWidget(QLabel("Number of rows:"))
+        hbox_rows.addWidget(self.num_rows)
+        layout.addLayout(hbox_rows)
 
-        self.vector_dim = QLineEdit()
-        self.vector_dim.setPlaceholderText("Vector Dimension")
-        layout.addWidget(self.vector_dim)
+        # Number of Dimensions
+        self.vector_dim = QLineEdit("100")
+        hbox_dims = QHBoxLayout()
+        hbox_dims.addWidget(QLabel("Number of dimensions:"))
+        hbox_dims.addWidget(self.vector_dim)
+        layout.addLayout(hbox_dims)
 
+        # Clustered
         self.clustered = QCheckBox("Clustered")
+        self.clustered.setChecked(True)
         layout.addWidget(self.clustered)
 
+        # Generate Parquet
+        self.generate_parquet = QCheckBox("Generate Parquet")
+        layout.addWidget(self.generate_parquet)
+
+        # Add to Datasets List
+        self.add_to_datasets = QCheckBox("Add to Datasets List")
+        self.add_to_datasets.setChecked(True)
+        layout.addWidget(self.add_to_datasets)
+
+        # Generate Data Button
         generate_button = QPushButton("Generate Data")
         generate_button.clicked.connect(self.generateData)
         layout.addWidget(generate_button)
 
+        # Visualization
+        self.visualization_layout = QVBoxLayout()
+        self.plot_data = PlotData(self, width=5, height=4, dpi=100)
+        self.visualization_layout.addWidget(self.plot_data)
+        
+        # Spinboxes for visualization
+        hbox_spin1 = QHBoxLayout()
+        self.spin_x = QSpinBox()
+        self.spin_x.setRange(0, 99)
+        self.spin_x.setValue(0)
+        hbox_spin1.addWidget(QLabel("X Dimension:"))
+        hbox_spin1.addWidget(self.spin_x)
+        layout.addLayout(hbox_spin1)
+
+        hbox_spin2 = QHBoxLayout()
+        self.spin_y = QSpinBox()
+        self.spin_y.setRange(0, 99)
+        self.spin_y.setValue(1)
+        hbox_spin2.addWidget(QLabel("Y Dimension:"))
+        hbox_spin2.addWidget(self.spin_y)
+        layout.addLayout(hbox_spin2)
+
+        hbox_samples = QHBoxLayout()
+        self.num_samples = QLineEdit("100")
+        hbox_samples.addWidget(QLabel("Number of samples:"))
+        hbox_samples.addWidget(self.num_samples)
+        replot_button = QPushButton("Replot")
+        replot_button.clicked.connect(self.replotData)
+        hbox_samples.addWidget(replot_button)
+        layout.addLayout(hbox_samples)
+
+        layout.addLayout(self.visualization_layout)
         self.tab2.setLayout(layout)
+
+    def generateData(self):
+        dataset_name = self.dataset_name.text()
+        dataset_path = self.dataset_path.text()
+        num_rows = int(self.num_rows.text())
+        num_dimensions = int(self.vector_dim.text())
+        clustered = self.clustered.isChecked()
+        parquet = self.generate_parquet.isChecked()
+
+        # Create the dataset directory
+        name = dataset_name.replace(" ", "_").lower()
+        full_path = f"{dataset_path}/{name}"
+        os.makedirs(full_path, exist_ok=True)
+
+        # Generate the dataset
+        generate_dataset(num_vectors=num_rows,
+                        num_dimensions=num_dimensions,
+                        folder_path=full_path,
+                        cluster=clustered, parquet=parquet)
+
+        # Add to datasets list if checked
+        if self.add_to_datasets.isChecked():
+            self.datasets_files.append(f"{full_path}/data.csv")
+            self.dataset_names.append(dataset_name)
+            # Update the datasets section in Tab 3
+            self.addDatasetToTab3(dataset_name)
+
+        # Load the generated data for visualization
+        self.generated_data = pd.read_csv(f"{full_path}/data.csv")
+        self.updateVisualization()
+
+    def addDatasetToTab3(self, dataset_name):
+        checkbox = QCheckBox(dataset_name)
+        checkbox.setChecked(True)
+        self.dataset_checkboxes.append(checkbox)
+        # Add the new dataset checkbox to the layout
+        datasets_section_layout = self.tab3.layout().itemAt(0).layout()
+        datasets_section_layout.insertWidget(len(self.dataset_checkboxes) - 1, checkbox)
+
+    def updateVisualization(self):
+        num_samples = int(self.num_samples.text())
+        x_index = self.spin_x.value()
+        y_index = self.spin_y.value()
+        self.plot_data.plot(self.generated_data, x_index, y_index, num_samples)
+
+    def replotData(self):
+        self.updateVisualization()
 
     def initTab3(self):
         layout = QVBoxLayout()
@@ -334,6 +458,9 @@ class MainWindow(QMainWindow):
                     pg_username=pgusername, pg_password=pgpassword,
                     milvus_db_path=milvusdb_path, qdrant_db_path=qdrantdb_path
                 )
+                if result_file not in self.datasets_result_files:
+                    self.datasets_result_files.append(result_file)
+                    
         # Clear the existing layout of Tab 1 before reinitializing it
         self.clearLayout(self.scrollLayout)
         self.initTab1Content()
@@ -385,21 +512,21 @@ class MainWindow(QMainWindow):
         path = QFileDialog.getExistingDirectory(self, "Select Directory")
         self.dataset_path.setText(path)
 
-    def browseDBFolder(self):
-        path = QFileDialog.getExistingDirectory(self, "Select Directory")
-        self.db_folder.setText(path)
+    # def browseDBFolder(self):
+    #     path = QFileDialog.getExistingDirectory(self, "Select Directory")
+    #     self.db_folder.setText(path)
 
-    def generateData(self):
-        dataset_name = self.dataset_name.text()
-        dataset_path = self.dataset_path.text()
-        num_rows = int(self.num_rows.text())
-        vector_dim = int(self.vector_dim.text())
-        clustered = self.clustered.isChecked()
+    # def generateData(self):
+    #     dataset_name = self.dataset_name.text()
+    #     dataset_path = self.dataset_path.text()
+    #     num_rows = int(self.num_rows.text())
+    #     vector_dim = int(self.vector_dim.text())
+    #     clustered = self.clustered.isChecked()
 
-        # Placeholder: generate data logic
-        print(f"Generated dataset {dataset_name} at " +
-              f"{dataset_path} with {num_rows} rows and " +
-              f"{vector_dim} dimensions. Clustered: {clustered}")
+    #     # Placeholder: generate data logic
+    #     print(f"Generated dataset {dataset_name} at " +
+    #           f"{dataset_path} with {num_rows} rows and " +
+    #           f"{vector_dim} dimensions. Clustered: {clustered}")
 
 
 if __name__ == "__main__":
