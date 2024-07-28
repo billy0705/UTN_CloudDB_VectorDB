@@ -1,9 +1,11 @@
 import sys
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QFileDialog, QCheckBox, QScrollArea)
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QFileDialog, QCheckBox, QScrollArea, QLabel, QFormLayout)
 from PyQt5.QtCore import Qt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from plotting import get_plot_figure
+from testing import Benchmark
+
 
 class PlotCanvas(FigureCanvas):
     def __init__(self, parent=None, figure=None, width=5, height=4, dpi=100):
@@ -14,9 +16,13 @@ class PlotCanvas(FigureCanvas):
         super().__init__(fig)
         self.setParent(parent)
 
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.dataset_files = ["./result/result_small.json", "./result/result.json"]
+        self.dataset_names = ["Small Dataset", "Large Dataset"]
+        self.metrics = ['create_time', 'insert_time', 'similarity_time', 'size']
 
         self.setWindowTitle("Vector Database Benchmarking Tool")
         self.setGeometry(100, 100, 1200, 800)
@@ -45,10 +51,6 @@ class MainWindow(QMainWindow):
         scroll.setWidgetResizable(True)
         scrollContent = QWidget()
         self.scrollLayout = QVBoxLayout(scrollContent)
-
-        self.dataset_files = ["./result/result_small.json", "./result/result.json"]
-        self.dataset_names = ["Small Dataset", "Large Dataset"]
-        self.metrics = ['create_time', 'insert_time', 'similarity_time', 'size']
 
         for i, metric in enumerate(self.metrics):
             metric_layout = QVBoxLayout()
@@ -85,7 +87,7 @@ class MainWindow(QMainWindow):
             if widget == first_metric_layout:
                 plot_canvas = widget.itemAt(1).widget()
                 plot_canvas.setVisible(True)
-            
+
     def initTab2(self):
         layout = QVBoxLayout()
 
@@ -120,29 +122,188 @@ class MainWindow(QMainWindow):
     def initTab3(self):
         layout = QVBoxLayout()
 
-        self.db_folder = QLineEdit()
-        self.db_folder.setPlaceholderText("Database Folder")
+        # Datasets Section
+        datasets_section = QVBoxLayout()
+        datasets_label = QLabel("Datasets")
+        datasets_section.addWidget(datasets_label)
+
+        self.dataset_checkboxes = []
+        for dataset_name in self.dataset_names:
+            checkbox = QCheckBox(dataset_name)
+            checkbox.setChecked(True)
+            self.dataset_checkboxes.append(checkbox)
+            datasets_section.addWidget(checkbox)
+
+        hbox_new_dataset = QHBoxLayout()
+        self.new_dataset_name = QLineEdit()
+        self.new_dataset_name.setPlaceholderText("New Dataset Name")
+        hbox_new_dataset.addWidget(self.new_dataset_name)
+        datasets_section.addLayout(hbox_new_dataset)
+
+        hbox_new_dataset_path = QHBoxLayout()
+        self.new_dataset_path = QLineEdit()
+        self.new_dataset_path.setPlaceholderText("New Dataset Path")
         browse_button = QPushButton("Browse")
-        browse_button.clicked.connect(self.browseDBFolder)
-        layout.addWidget(self.db_folder)
-        layout.addWidget(browse_button)
+        browse_button.clicked.connect(self.browseNewDatasetPath)
+        hbox_new_dataset_path.addWidget(self.new_dataset_path)
+        hbox_new_dataset_path.addWidget(browse_button)
+        datasets_section.addLayout(hbox_new_dataset_path)
+
+        add_dataset_button = QPushButton("Add Dataset")
+        add_dataset_button.clicked.connect(self.addDataset)
+        datasets_section.addWidget(add_dataset_button)
+
+        layout.addLayout(datasets_section)
+
+        # Frameworks Section
+        frameworks_section = QVBoxLayout()
+        frameworks_label = QLabel("Frameworks")
+        frameworks_section.addWidget(frameworks_label)
 
         self.pgvector_checkbox = QCheckBox("PGVector")
+        self.pgvector_checkbox.stateChanged.connect(self.togglePGVector)
+        frameworks_section.addWidget(self.pgvector_checkbox)
+
+        self.pg_dbname = QLineEdit('postgres')
+        self.pg_dbname.setPlaceholderText("PGVector DB Name")
+        self.pg_username = QLineEdit('billyslim')
+        self.pg_username.setPlaceholderText("PGVector Username")
+        self.pg_password = QLineEdit('')
+        self.pg_password.setPlaceholderText("PGVector Password")
+        frameworks_section.addWidget(self.pg_dbname)
+        frameworks_section.addWidget(self.pg_username)
+        frameworks_section.addWidget(self.pg_password)
+        self.pg_dbname.setEnabled(False)
+        self.pg_username.setEnabled(False)
+        self.pg_password.setEnabled(False)
+
         self.milvus_checkbox = QCheckBox("Milvus")
+        self.milvus_checkbox.stateChanged.connect(self.toggleMilvus)
+        frameworks_section.addWidget(self.milvus_checkbox)
+
+        hbox_milvus = QHBoxLayout()
+        self.milvus_db_path = QLineEdit('milvus_db/milvus_demo.db')
+        self.milvus_db_path.setPlaceholderText("Milvus DB Path")
+        browse_milvus_button = QPushButton("Browse")
+        browse_milvus_button.clicked.connect(self.browseMilvusPath)
+        hbox_milvus.addWidget(self.milvus_db_path)
+        hbox_milvus.addWidget(browse_milvus_button)
+        frameworks_section.addLayout(hbox_milvus)
+        self.milvus_db_path.setEnabled(False)
+        browse_milvus_button.setEnabled(False)
+
         self.qdrant_checkbox = QCheckBox("Qdrant")
-        layout.addWidget(self.pgvector_checkbox)
-        layout.addWidget(self.milvus_checkbox)
-        layout.addWidget(self.qdrant_checkbox)
+        self.qdrant_checkbox.stateChanged.connect(self.toggleQdrant)
+        frameworks_section.addWidget(self.qdrant_checkbox)
 
-        self.pgvector_settings = QLineEdit()
-        self.pgvector_settings.setPlaceholderText("PGVector Settings (username, db_name, etc.)")
-        layout.addWidget(self.pgvector_settings)
+        hbox_qdrant = QHBoxLayout()
+        self.qdrant_db_path = QLineEdit('./qdrant_data')
+        self.qdrant_db_path.setPlaceholderText("Qdrant DB Path")
+        browse_qdrant_button = QPushButton("Browse")
+        browse_qdrant_button.clicked.connect(self.browseQdrantPath)
+        hbox_qdrant.addWidget(self.qdrant_db_path)
+        hbox_qdrant.addWidget(browse_qdrant_button)
+        frameworks_section.addLayout(hbox_qdrant)
+        self.qdrant_db_path.setEnabled(False)
+        browse_qdrant_button.setEnabled(False)
 
-        self.qdrant_settings = QLineEdit()
-        self.qdrant_settings.setPlaceholderText("Qdrant Settings (db_path, etc.)")
-        layout.addWidget(self.qdrant_settings)
+        layout.addLayout(frameworks_section)
+
+        # Run Tests Section
+        run_tests_section = QVBoxLayout()
+        run_tests_label = QLabel("Run Tests")
+        run_tests_section.addWidget(run_tests_label)
+
+        hbox_result = QHBoxLayout()
+        self.result_folder_path = QLineEdit('./result/')
+        self.result_folder_path.setPlaceholderText("Result Folder Path")
+        browse_result_button = QPushButton("Browse")
+        browse_result_button.clicked.connect(self.browseResultFolder)
+        hbox_result.addWidget(self.result_folder_path)
+        hbox_result.addWidget(browse_result_button)
+        run_tests_section.addLayout(hbox_result)
+
+        run_tests_button = QPushButton("Run Tests")
+        run_tests_button.clicked.connect(self.runTests)
+        run_tests_section.addWidget(run_tests_button)
+
+        layout.addLayout(run_tests_section)
 
         self.tab3.setLayout(layout)
+
+    def browseNewDatasetPath(self):
+        path = QFileDialog.getExistingDirectory(self, "Select Directory")
+        self.new_dataset_path.setText(path)
+
+    def addDataset(self):
+        dataset_name = self.new_dataset_name.text()
+        dataset_path = self.new_dataset_path.text()
+        if dataset_name and dataset_path:
+            checkbox = QCheckBox(dataset_name)
+            checkbox.setChecked(True)
+            self.dataset_checkboxes.append(checkbox)
+            self.dataset_names.append(dataset_name)
+            self.dataset_files.append(dataset_path)
+            self.tab3.layout().itemAt(0).layout().insertWidget(len(self.dataset_checkboxes) - 1, checkbox)
+
+    def toggleMilvus(self):
+        state = self.milvus_checkbox.isChecked()
+        self.milvus_db_path.setEnabled(state)
+        # Ensure the Milvus browse button is enabled/disabled correctly
+        for i in range(self.tab3.layout().count()):
+            item = self.tab3.layout().itemAt(i)
+            if isinstance(item, QHBoxLayout):
+                for j in range(item.count()):
+                    widget = item.itemAt(j).widget()
+                    if isinstance(widget, QPushButton) and widget.text() == "Browse" and widget.parent() == self.milvus_db_path:
+                        widget.setEnabled(state)
+
+    def toggleQdrant(self):
+        state = self.qdrant_checkbox.isChecked()
+        self.qdrant_db_path.setEnabled(state)
+        # Ensure the Qdrant browse button is enabled/disabled correctly
+        for i in range(self.tab3.layout().count()):
+            item = self.tab3.layout().itemAt(i)
+            if isinstance(item, QHBoxLayout):
+                for j in range(item.count()):
+                    widget = item.itemAt(j).widget()
+                    if isinstance(widget, QPushButton) and widget.text() == "Browse" and widget.parent() == self.qdrant_db_path:
+                        widget.setEnabled(state)
+
+    def togglePGVector(self):
+        state = self.pgvector_checkbox.isChecked()
+        self.pg_dbname.setEnabled(state)
+        self.pg_username.setEnabled(state)
+        self.pg_password.setEnabled(state)
+
+    def browseMilvusPath(self):
+        path = QFileDialog.getExistingDirectory(self, "Select Directory")
+        self.milvus_db_path.setText(path)
+
+    def browseQdrantPath(self):
+        path = QFileDialog.getExistingDirectory(self, "Select Directory")
+        self.qdrant_db_path.setText(path)
+
+    def browseResultFolder(self):
+        path = QFileDialog.getExistingDirectory(self, "Select Directory")
+        self.result_folder_path.setText(path)
+
+    def runTests(self):
+        for checkbox, dataset_file in zip(self.dataset_checkboxes, self.dataset_files):
+            if checkbox.isChecked():
+                test_csv_path = dataset_file.replace(".json", "_test.json")
+                result_file = f"{self.result_folder_path.text()}/{checkbox.text().replace(' ', '_').lower()}_result.json"
+                Benchmark(
+                    csv_path=dataset_file,
+                    test_csv_path=test_csv_path,
+                    result_file=result_file,
+                    pg_dbname=self.pg_dbname.text() if self.pgvector_checkbox.isChecked() else '',
+                    pg_username=self.pg_username.text() if self.pgvector_checkbox.isChecked() else '',
+                    pg_password=self.pg_password.text() if self.pgvector_checkbox.isChecked() else '',
+                    milvus_db_path=self.milvus_db_path.text() if self.milvus_checkbox.isChecked() else '',
+                    qdrant_db_path=self.qdrant_db_path.text() if self.qdrant_checkbox.isChecked() else ''
+                )
+        self.initTab1()
 
     def updatePlot(self, metric, dataset, sender_button):
         for i in range(self.scrollLayout.count()):
@@ -193,6 +354,7 @@ class MainWindow(QMainWindow):
 
         # Placeholder: generate data logic
         print(f"Generated dataset {dataset_name} at {dataset_path} with {num_rows} rows and {vector_dim} dimensions. Clustered: {clustered}")
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
