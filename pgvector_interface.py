@@ -30,7 +30,7 @@ class PGvectorInterface:
         return result
 
     def create_table(self, table_name, dimention,
-                     metrix=None, index_types=None):
+                     metric=None, index_types=None):
         query = f'''CREATE TABLE IF NOT EXISTS {table_name}
          (id bigserial PRIMARY KEY, embedding vector({dimention}))'''
         self.conn.execute(query)
@@ -45,19 +45,19 @@ class PGvectorInterface:
             index_flag = 0
             print("No index_types")
 
-        if metrix == 'l2':
+        if metric == 'l2':
             index_flag = 1
-            metrix_name = "vector_l2_ops"
-        elif metrix == 'cosine':
+            metric_name = "vector_l2_ops"
+        elif metric == 'cosine':
             index_flag = 1
-            metrix_name = "vector_cosine_ops"
+            metric_name = "vector_cosine_ops"
         else:
-            print("No metrix")
+            print("No metric")
 
         if index_flag == 1:
             index_query = f"""
             CREATE INDEX ON {table_name}
-            USING {index_types} (embedding {metrix_name})"""
+            USING {index_types} (embedding {metric_name})"""
             self.conn.execute(index_query)
             # print("create index")
         else:
@@ -99,16 +99,16 @@ class PGvectorInterface:
             self.conn.execute(query, (vector,))
         self.conn.commit()
 
-    def indexing_data(self, table_name, metrix, index_types):
-        if metrix == 'l2':
-            metrix_name = "vector_l2_ops"
-        elif metrix == 'cosine':
-            metrix_name = "vector_cosine_ops"
+    def indexing_data(self, table_name, metric, index_types):
+        if metric == 'l2':
+            metric_name = "vector_l2_ops"
+        elif metric == 'cosine':
+            metric_name = "vector_cosine_ops"
         else:
             return
         index_query = f"""
         CREATE INDEX ON {table_name}
-        USING {index_types} (embedding {metrix_name})"""
+        USING {index_types} (embedding {metric_name})"""
         self.conn.execute(index_query)
         self.conn.commit()
 
@@ -119,13 +119,13 @@ class PGvectorInterface:
         self.conn.commit()
         return result[0][0]
 
-    def similarity_search(self, table_name, embedding_vector, metrix):
-        if metrix == "l2":
+    def similarity_search(self, table_name, embedding_vector, metric):
+        if metric == "l2":
             symbol = "<->"
-        elif metrix == "cosine":
+        elif metric == "cosine":
             symbol = "<=>"
         else:
-            print("Error with metrix type")
+            print("Error with metric type")
             return
         sim_query = f"""
         SELECT id, embedding {symbol} (%s) AS distance

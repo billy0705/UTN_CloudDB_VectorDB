@@ -21,7 +21,7 @@ class MilvusInterface:
         self.client.close()
         pass
 
-    def create_table(self, name, dimention, metrix=None, index_types=None):
+    def create_table(self, name, dimention, metric=None, index_types=None):
         if self.client.has_collection(name):
             res = self.client.describe_collection(
                 collection_name=name
@@ -31,7 +31,7 @@ class MilvusInterface:
             index_params = self.client.prepare_index_params()
             index_params.add_index(
                 field_name="vector",
-                metric_type=metrix,
+                metric_type=metric,
                 index_type=index_types,
                 index_name="vector_index",
                 params={"nlist": 128}
@@ -94,12 +94,12 @@ class MilvusInterface:
         return res['row_count']
         pass
 
-    def similarity_search(self, name, embedding_vector, metrix=None):
+    def similarity_search(self, name, embedding_vector, metric=None):
         res = self.client.search(
             collection_name=name,
             data=[embedding_vector.tolist()],
             limit=1,
-            search_params={"metric_type": metrix, "params": {}}
+            search_params={"metric_type": metric, "params": {}}
         )
         result = json.dumps(res, indent=4)
         # print(result)

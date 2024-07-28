@@ -21,7 +21,7 @@ class QDrantInterface:
     def disconnect_server(self):
         self.conn = self.conn.close()
 
-    def create_table(self, collection_name, vector_size, metrix=None,
+    def create_table(self, collection_name, vector_size, metric=None,
                      index_types=None):
         if index_types is not None:
             index_config = HnswConfig(
