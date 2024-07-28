@@ -1,7 +1,11 @@
 import sys
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QFileDialog, QCheckBox, QScrollArea, QLabel, QFormLayout)
-from PyQt5.QtCore import Qt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QTabWidget,
+    QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
+    QLineEdit, QFileDialog, QCheckBox,
+    QScrollArea, QLabel)
+from matplotlib.backends.backend_qt5agg import (
+    FigureCanvasQTAgg as FigureCanvas)
 import matplotlib.pyplot as plt
 from plotting import get_plot_figure
 from testing import Benchmark
@@ -25,7 +29,8 @@ class MainWindow(QMainWindow):
         self.datasets_files = ["./data/small_dataset/data.csv",
                                "./data/large_dataset/data.csv"]
         self.dataset_names = ["Small Dataset", "Large Dataset"]
-        self.metrics = ['create_time', 'insert_time', 'similarity_time', 'size']
+        self.metrics = ['create_time', 'insert_time',
+                        'similarity_time', 'size']
 
         self.setWindowTitle("Vector Database Benchmarking Tool")
         self.setGeometry(100, 100, 1200, 800)
@@ -62,26 +67,33 @@ class MainWindow(QMainWindow):
             metric_layout = QVBoxLayout()
 
             button_layout = QHBoxLayout()
-            for j, (dataset, dataset_name) in enumerate(zip(self.datasets_result_files, self.dataset_names)):
-                dataset_button = QPushButton(f"{dataset_name} - {metric.replace('_', ' ').title()}")
+            for j, (dataset, dataset_name) in enumerate(
+                 zip(self.datasets_result_files, self.dataset_names)):
+                dataset_button = QPushButton(
+                    f"{dataset_name} - {metric.replace('_', ' ').title()}")
                 dataset_button.setCheckable(True)
                 dataset_button.setChecked(False)  # Initially unchecked
-                dataset_button.clicked.connect(lambda _, m=metric, d=dataset, btn=dataset_button: self.updatePlot(m, d, btn))
+                dataset_button.clicked.connect(
+                    lambda _, m=metric, d=dataset,
+                    btn=dataset_button: self.updatePlot(m, d, btn))
                 button_layout.addWidget(dataset_button)
                 if i == 0 and j == 0:
                     default_dataset = dataset
                     first_plot_button = dataset_button
-                    first_metric_layout = metric_layout  # Track the correct layout for the first plot
+                    # Track the correct layout for the first plot
+                    first_metric_layout = metric_layout
 
             metric_layout.addLayout(button_layout)
             fig = get_plot_figure(metric, default_dataset)
-            plot_canvas = PlotCanvas(self.scrollContent, figure=fig, width=12, height=8)
+            plot_canvas = PlotCanvas(self.scrollContent,
+                                     figure=fig, width=12, height=8)
             plot_canvas.setVisible(False)  # Initially hidden
             metric_layout.addWidget(plot_canvas)
             self.scrollLayout.addLayout(metric_layout)
 
         first_plot_button.setChecked(True)
-        self.updatePlot(self.metrics[0], self.datasets_result_files[0], first_plot_button)
+        self.updatePlot(self.metrics[0], self.datasets_result_files[0],
+                        first_plot_button)
 
         self.tab1_scroll.setWidget(self.scrollContent)
         self.tab1_layout.addWidget(self.tab1_scroll)
@@ -249,7 +261,8 @@ class MainWindow(QMainWindow):
             self.dataset_checkboxes.append(checkbox)
             self.dataset_names.append(dataset_name)
             self.datasets_files.append(f"{dataset_path}/data.csv")
-            self.tab3.layout().itemAt(0).layout().insertWidget(len(self.dataset_checkboxes) - 1, checkbox)
+            self.tab3.layout().itemAt(0).layout()\
+                .insertWidget(len(self.dataset_checkboxes) - 1, checkbox)
 
     def toggleMilvus(self):
         state = self.milvus_checkbox.isChecked()
@@ -260,7 +273,9 @@ class MainWindow(QMainWindow):
             if isinstance(item, QHBoxLayout):
                 for j in range(item.count()):
                     widget = item.itemAt(j).widget()
-                    if isinstance(widget, QPushButton) and widget.text() == "Browse" and widget.parent() == self.milvus_db_path:
+                    if isinstance(widget, QPushButton) and\
+                        widget.text() == "Browse" and\
+                            widget.parent() == self.milvus_db_path:
                         widget.setEnabled(state)
 
     def toggleQdrant(self):
@@ -272,7 +287,9 @@ class MainWindow(QMainWindow):
             if isinstance(item, QHBoxLayout):
                 for j in range(item.count()):
                     widget = item.itemAt(j).widget()
-                    if isinstance(widget, QPushButton) and widget.text() == "Browse" and widget.parent() == self.qdrant_db_path:
+                    if isinstance(widget, QPushButton) and\
+                        widget.text() == "Browse" and\
+                            widget.parent() == self.qdrant_db_path:
                         widget.setEnabled(state)
 
     def togglePGVector(self):
@@ -294,19 +311,28 @@ class MainWindow(QMainWindow):
         self.result_folder_path.setText(path)
 
     def runTests(self):
-        for checkbox, dataset_file in zip(self.dataset_checkboxes, self.datasets_files):
+        for checkbox, dataset_file in zip(
+             self.dataset_checkboxes, self.datasets_files):
             if checkbox.isChecked():
                 test_csv_path = dataset_file.replace("data.csv", "test.csv")
-                result_file = f"{self.result_folder_path.text()}/{checkbox.text().replace(' ', '_').lower()}_result.json"
+                result_file = f"{self.result_folder_path.text()}/" +\
+                    f"{checkbox.text().replace(' ', '_').lower()}_result.json"
+                pgname = self.pg_dbname.text() if self\
+                    .pgvector_checkbox.isChecked() else ''
+                pgusername = self.pg_username.text() if self\
+                    .pgvector_checkbox.isChecked() else ''
+                pgpassword = self.pg_password.text() if self\
+                    .pgvector_checkbox.isChecked() else ''
+                milvusdb_path = self.milvus_db_path.text() if self\
+                    .milvus_checkbox.isChecked() else ''
+                qdrantdb_path = self.qdrant_db_path.text() if self\
+                    .qdrant_checkbox.isChecked() else ''
+
                 Benchmark(
-                    csv_path=dataset_file,
-                    test_csv_path=test_csv_path,
-                    result_file=result_file,
-                    pg_dbname=self.pg_dbname.text() if self.pgvector_checkbox.isChecked() else '',
-                    pg_username=self.pg_username.text() if self.pgvector_checkbox.isChecked() else '',
-                    pg_password=self.pg_password.text() if self.pgvector_checkbox.isChecked() else '',
-                    milvus_db_path=self.milvus_db_path.text() if self.milvus_checkbox.isChecked() else '',
-                    qdrant_db_path=self.qdrant_db_path.text() if self.qdrant_checkbox.isChecked() else ''
+                    csv_path=dataset_file, test_csv_path=test_csv_path,
+                    result_file=result_file, pg_dbname=pgname,
+                    pg_username=pgusername, pg_password=pgpassword,
+                    milvus_db_path=milvusdb_path, qdrant_db_path=qdrantdb_path
                 )
         # Clear the existing layout of Tab 1 before reinitializing it
         self.clearLayout(self.scrollLayout)
@@ -340,18 +366,20 @@ class MainWindow(QMainWindow):
                     if found_plot:
                         # Create a new figure and PlotCanvas
                         fig = get_plot_figure(metric, dataset)
-                        new_plot_canvas = PlotCanvas(parent=plot_canvas.parent(), figure=fig, width=12, height=8)
-                        
+                        new_plot_canvas = PlotCanvas(
+                            parent=plot_canvas.parent(),
+                            figure=fig, width=12, height=8)
                         # Remove the old plot canvas
                         widget.removeWidget(plot_canvas)
-                        plot_canvas.setParent(None)  # This ensures the widget is properly destroyed
+                        # This ensures the widget is properly destroyed
+                        plot_canvas.setParent(None)
 
                         # Add the new plot canvas
                         widget.addWidget(new_plot_canvas)
 
                         new_plot_canvas.setVisible(True)
                     else:
-                        plot_canvas.setVisible(False)                        
+                        plot_canvas.setVisible(False)
 
     def browsePath(self):
         path = QFileDialog.getExistingDirectory(self, "Select Directory")
@@ -369,7 +397,9 @@ class MainWindow(QMainWindow):
         clustered = self.clustered.isChecked()
 
         # Placeholder: generate data logic
-        print(f"Generated dataset {dataset_name} at {dataset_path} with {num_rows} rows and {vector_dim} dimensions. Clustered: {clustered}")
+        print(f"Generated dataset {dataset_name} at " +
+              f"{dataset_path} with {num_rows} rows and " +
+              f"{vector_dim} dimensions. Clustered: {clustered}")
 
 
 if __name__ == "__main__":

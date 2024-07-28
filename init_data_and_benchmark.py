@@ -1,7 +1,6 @@
 import os
-import json
 from data_generation import generate_dataset
-from testing import Benchmark  # Assuming this is the correct import for Benchmark
+from testing import Benchmark
 
 
 # Function to check and create directory
@@ -41,7 +40,8 @@ def main():
             continue
 
         # Step 3: Generate dataset
-        generate_dataset(params["num_vectors"], params["num_dim"], dataset_path)
+        generate_dataset(params["num_vectors"], params["num_dim"],
+                         dataset_path)
         print(f"Generated dataset {dataset_name} saved to {dataset_path}")
         # Paths for data and test CSV files
         data_csv_path = os.path.join(dataset_path, "data.csv")
@@ -54,7 +54,8 @@ def main():
         try:
             Benchmark(data_csv_path, test_csv_path, result_file=result_file,
                       pg_dbname="", pg_username="")
-            print(f"Benchmark results for {dataset_name} saved to {result_file}")
+            print(
+                f"Benchmark results for {dataset_name} saved to {result_file}")
         except Exception as e:
             print("Benchmark was not able to finish calculating " +
                   f"and generating results with error {e}")
