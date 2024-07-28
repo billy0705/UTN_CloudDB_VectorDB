@@ -228,12 +228,13 @@ class MainWindow(QMainWindow):
 
         # Generate the dataset
         generate_dataset(num_vectors=num_rows,
-                        num_dimensions=num_dimensions,
-                        folder_path=full_path,
-                        cluster=clustered, parquet=parquet)
+                         num_dimensions=num_dimensions,
+                         folder_path=full_path,
+                         cluster=clustered, parquet=parquet)
 
         # Add to datasets list if checked
-        if self.add_to_datasets.isChecked():
+        if self.add_to_datasets.isChecked() and\
+                dataset_name not in self.dataset_names:
             self.datasets_files.append(f"{full_path}/data.csv")
             self.dataset_names.append(dataset_name)
             # Update the datasets section in Tab 3
