@@ -18,9 +18,9 @@ def get_data_info(csv_path):
 test_db_interface = [QDrantInterface, MilvusInterface, PGvectorInterface]
 # test_db_interface = [PGvectorInterface]
 test_metric = {
-    PGvectorInterface: ["l2", "cosine"],
+    PGvectorInterface: ["cosine", "l2"],
     MilvusInterface: ["COSINE", "L2"],
-    QDrantInterface: ["Cosine", "Euclid"]
+    QDrantInterface: ["Cosine", "L2"]
 }
 test_index_type = {
     PGvectorInterface: ["hnsw", "ivfflat"],

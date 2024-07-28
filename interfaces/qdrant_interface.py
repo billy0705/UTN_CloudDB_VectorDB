@@ -22,13 +22,13 @@ class QDrantInterface:
                      index_types=None):
         if metric == "Cosine":
             dist = Distance.COSINE
-        elif metric == "Euclid":
+        elif metric == "L2":
             dist = Distance.EUCLID
         if index_types is not None:
             index_config = HnswConfig(
                 m=16,
                 ef_construct=64,
-                # full_scan_threshold=10000
+                full_scan_threshold=1000
             )
         self.conn.create_collection(
             collection_name=collection_name,
@@ -81,11 +81,15 @@ class QDrantInterface:
 
     def similarity_search(self, collection_name, embedding_vector,
                           metric='Cosine', limit=5):
+        if metric == "Cosine":
+            dist = "Cosine"
+        elif metric == "L2":
+            dist = "Euclid"
         res = self.conn.search(
             collection_name=collection_name,
             query_vector=embedding_vector,
             limit=limit,
-            search_params={"distance": metric}
+            search_params={"distance": dist}
         )
         result = [{"id": match.id, "score": match.score} for match in res]
         return result[0]["id"], result[0]["score"]
