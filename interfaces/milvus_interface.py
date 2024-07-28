@@ -1,9 +1,8 @@
 # pip install pymilvus milvus sentence-transformers
 # import numpy as np
 import pandas as pd
-import json
 # from milvus import default_server
-from pymilvus import MilvusClient, connections
+from pymilvus import MilvusClient
 # from time import time
 
 
@@ -39,7 +38,8 @@ class MilvusInterface:
 
             self.client.create_collection(
                 collection_name=name,
-                dimension=dimention
+                dimension=dimention,
+                metric_type=metric
             )
 
             self.client.create_index(
@@ -75,7 +75,7 @@ class MilvusInterface:
         df = df.to_numpy()
         # print(f"{df.shape = }")
         data = [
-            {"id": 0, "vector": df[i, :]}
+            {"id": i, "vector": df[i, :]}
             for i in range(df.shape[1])
         ]
         return data
@@ -98,9 +98,12 @@ class MilvusInterface:
         res = self.client.search(
             collection_name=name,
             data=[embedding_vector.tolist()],
-            limit=1,
+            limit=3,
             search_params={"metric_type": metric, "params": {}}
         )
-        result = json.dumps(res, indent=4)
+        # print(res[0])
+        # print(type(res))
+        # result = json.dumps(res, indent=4)
         # print(result)
-        return result
+        # print(result)
+        return res[0][0]['id'], res[0][0]['distance']

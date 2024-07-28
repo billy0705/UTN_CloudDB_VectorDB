@@ -1,11 +1,8 @@
 from qdrant_client import QdrantClient
-import qdrant_client
-# from qdrant_client.http.models import Filter, SearchParams, SearchRequest
-from qdrant_client.http.models import VectorParams, Distance, PointStruct, HnswConfig
+from qdrant_client.http.models import (VectorParams, Distance,
+                                       PointStruct, HnswConfig)
 import os
 import pandas as pd
-# import numpy as np
-import json
 
 
 class QDrantInterface:
@@ -21,18 +18,22 @@ class QDrantInterface:
     def disconnect_server(self):
         self.conn = self.conn.close()
 
-    def create_table(self, collection_name, vector_size, metric=None,
+    def create_table(self, collection_name, vector_size, metric="Cosine",
                      index_types=None):
+        if metric == "Cosine":
+            dist = Distance.COSINE
+        elif metric == "Euclid":
+            dist = Distance.EUCLID
         if index_types is not None:
             index_config = HnswConfig(
-                m=16,  # Maximum number of edges per node in HNSW graph
-                ef_construct=200,  # Size of dynamic list for nearest neighbors during graph construction
-                full_scan_threshold=10000
+                m=16,
+                ef_construct=64,
+                # full_scan_threshold=10000
             )
         self.conn.create_collection(
             collection_name=collection_name,
             vectors_config=VectorParams(size=vector_size,
-                                        distance=Distance.COSINE),
+                                        distance=dist),
             hnsw_config=index_config
         )
 
@@ -52,8 +53,8 @@ class QDrantInterface:
     def get_size_of_table(self, collection_name):
         qdrant_data_size = self._get_directory_size(
             f'{self.data_path}/collection/{collection_name}')
-        print(f"Size of data in Qdrant: {qdrant_data_size} bytes")
-        print(qdrant_data_size)
+        # print(f"Size of data in Qdrant: {qdrant_data_size} bytes")
+        # print(qdrant_data_size)
         return qdrant_data_size
 
     def insert_single_vector(self, collection_name, vector):
@@ -74,7 +75,7 @@ class QDrantInterface:
 
     def get_rows_cnt(self, collection_name):
         collection_info = self.conn.get_collection(collection_name)
-        print(collection_info)
+        # print(collection_info)
         # result = json.dumps(collection_info, indent=4)
         return collection_info.points_count
 
@@ -87,4 +88,4 @@ class QDrantInterface:
             search_params={"distance": metric}
         )
         result = [{"id": match.id, "score": match.score} for match in res]
-        return result
+        return result[0]["id"], result[0]["score"]

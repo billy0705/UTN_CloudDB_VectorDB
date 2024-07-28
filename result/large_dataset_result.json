@@ -12,16 +12,18 @@
         "Test round": 1,
         "Methods": {
             "HNSW+COSINE": {
-                "create_time": 0.005864381790161133,
-                "insert_time": 38.85059857368469,
-                "similarity_time": 5.03592848777771,
-                "size": 95834112
+                "create_time": 0.004640817642211914,
+                "insert_time": 15.39747405052185,
+                "similarity_time": 5.914690971374512,
+                "size": 95834112,
+                "total_distance": 82.8015614609046
             },
             "HNSW+EUCLID": {
-                "create_time": 0.1902623176574707,
-                "insert_time": 43.160884141922,
-                "similarity_time": 12.648733139038086,
-                "size": 95834112
+                "create_time": 0.0043201446533203125,
+                "insert_time": 13.198134899139404,
+                "similarity_time": 8.378629922866821,
+                "size": 95834112,
+                "total_distance": 1685.1270270102561
             }
         }
     },
@@ -37,29 +39,75 @@
         },
         "Test round": 1,
         "Methods": {
-            "HNSW+L2": {
-                "create_time": 1.0350654125213623,
-                "insert_time": 0.9302451610565186,
-                "similarity_time": 0.5157544612884521,
-                "size": 0
-            },
             "HNSW+COSINE": {
-                "create_time": 1.0451927185058594,
-                "insert_time": 1.0736160278320312,
-                "similarity_time": 0.2145531177520752,
-                "size": 0
+                "create_time": 1.0211689472198486,
+                "insert_time": 1.1902971267700195,
+                "similarity_time": 0.21299386024475098,
+                "size": 0,
+                "total_distance": 82.28186892466586
             },
-            "FLAT+L2": {
-                "create_time": 1.030768632888794,
-                "insert_time": 0.8402872085571289,
-                "similarity_time": 0.21739649772644043,
-                "size": 0
+            "HNSW+L2": {
+                "create_time": 1.0200870037078857,
+                "insert_time": 0.9971380233764648,
+                "similarity_time": 0.12601017951965332,
+                "size": 0,
+                "total_distance": 1695.385351063334
             },
             "FLAT+COSINE": {
-                "create_time": 1.0356323719024658,
-                "insert_time": 0.7162373065948486,
-                "similarity_time": 0.22283029556274414,
-                "size": 0
+                "create_time": 1.014861822128296,
+                "insert_time": 1.129094123840332,
+                "similarity_time": 0.18734312057495117,
+                "size": 0,
+                "total_distance": 82.28186892466586
+            },
+            "FLAT+L2": {
+                "create_time": 1.0158731937408447,
+                "insert_time": 0.8849911689758301,
+                "similarity_time": 0.10604095458984375,
+                "size": 0,
+                "total_distance": 1695.385351063334
+            }
+        }
+    },
+    {
+        "Name": "PGvector",
+        "Train-Data-info": {
+            "#vector": 10000,
+            "dimension": 1000
+        },
+        "Test-Data-info": {
+            "#vector": 100,
+            "dimension": 1000
+        },
+        "Test round": 1,
+        "Methods": {
+            "HNSW+L2": {
+                "create_time": 0.011131048202514648,
+                "insert_time": 259.0309360027313,
+                "similarity_time": 5.698276042938232,
+                "size": 138141696,
+                "total_distance": 1999.3138681585233
+            },
+            "HNSW+COSINE": {
+                "create_time": 0.01722407341003418,
+                "insert_time": 319.0100939273834,
+                "similarity_time": 6.417556047439575,
+                "size": 138141696,
+                "total_distance": 67.27039310051768
+            },
+            "IVFFLAT+L2": {
+                "create_time": 0.05719113349914551,
+                "insert_time": 14.630728960037231,
+                "similarity_time": 0.1620616912841797,
+                "size": 139403264,
+                "total_distance": 1972.5741926651283
+            },
+            "IVFFLAT+COSINE": {
+                "create_time": 0.08182072639465332,
+                "insert_time": 14.658817052841187,
+                "similarity_time": 0.11696910858154297,
+                "size": 139436032,
+                "total_distance": 69.25590064525264
             }
         }
     }

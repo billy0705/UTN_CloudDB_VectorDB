@@ -2,11 +2,13 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 # read JSON
 def read_json(file_path):
     with open(file_path, 'r') as file:
         data = json.load(file)
     return data
+
 
 # extract data
 def extract_data(data, metric):
@@ -20,6 +22,7 @@ def extract_data(data, metric):
             results[database][method] = method_results[metric]
             methods.add(method)
     return results, methods
+
 
 def generate_figure(data, methods, title, ylabel):
     fig, ax = plt.subplots(figsize=(12, 8))
@@ -40,8 +43,9 @@ def generate_figure(data, methods, title, ylabel):
     ax.set_title(title)
     ax.legend()
     ax.grid(True)
-    
+
     return fig
+
 
 metrics_labels = {
     'create_time': ('Create Time Comparison', 'Time (s)'),
@@ -49,6 +53,7 @@ metrics_labels = {
     'similarity_time': ('Similarity Time Comparison', 'Time (s)'),
     'size': ('Size Comparison', 'Size (bytes)')
 }
+
 
 def get_plot_figure(metric, file_path):
     data = read_json(file_path)

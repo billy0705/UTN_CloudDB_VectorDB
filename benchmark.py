@@ -1,10 +1,12 @@
 import time
 import pandas as pd
+import numpy as np
+from numpy.linalg import norm
 import json
 
-from pgvector_interface import PGvectorInterface
-from milvus_interface import MilvusInterface
-from qdrant_interface import QDrantInterface
+from interfaces.pgvector_interface import PGvectorInterface
+from interfaces.milvus_interface import MilvusInterface
+from interfaces.qdrant_interface import QDrantInterface
 
 
 def get_data_info(csv_path):
@@ -17,7 +19,7 @@ test_db_interface = [QDrantInterface, MilvusInterface, PGvectorInterface]
 # test_db_interface = [PGvectorInterface]
 test_metric = {
     PGvectorInterface: ["l2", "cosine"],
-    MilvusInterface: ["L2", "COSINE"],
+    MilvusInterface: ["COSINE", "L2"],
     QDrantInterface: ["Cosine", "Euclid"]
 }
 test_index_type = {
@@ -58,29 +60,50 @@ def benchmark_test(i, index_type: str, metric: str, db_BM,
     # insert data
     start_time = time.time()
     db.insert_vector_from_csv(collection_name, data)
+    if index_type == "ivfflat":
+        db.indexing_data(collection_name, metric, index_type)
     db_BM["Methods"][t_name]["insert_time"] += (time.time() -
                                                 start_time)
-
-    # db.indexing_data(collection_name, metric, index_type)
 
     # size of table
     db_BM["Methods"][t_name]["size"] += db.get_size_of_table(
         collection_name
     )
 
+    distances_total = 0
     # similarity_search
     start_time = time.time()
     for test_i in range(test_vector.shape[0]):
-        _ = db.similarity_search(
+        id, _ = db.similarity_search(
             collection_name,
             test_vector[test_i, :],
             metric
         )
+        # print(f"{dist = }")
+        # print(data[id])
+        B = test_vector[test_i, :]
+        if db_BM["Name"] == "PGvector":
+            A = data[id]
+        elif db_BM["Name"] == "QDrant":
+            A = data[id].vector
+        else:
+            A = data[id]["vector"]
+
+        if metric.upper() == "COSINE":
+            distances_total += np.dot(A, B)/(norm(A)*norm(B))
+        else:
+            distances_total += norm(A-B)
+        # print(f"{npdist = }")
+
     db_BM["Methods"][t_name]["similarity_time"] += (
         time.time() - start_time
     )
 
+    db_BM["Methods"][t_name]["total_distance"] = (distances_total /
+                                                  test_vector.shape[0])
+
     # others ...
+    print(f"{distances_total = }")
 
     # print results
 
@@ -170,7 +193,7 @@ def Benchmark(
                     db_BM = benchmark_test(i, index_type, metric,
                                            db_BM, db, collection_name,
                                            csv_path, test_vector)
-                    
+
                     print(f"Round {i+1} spent {time.time()-round_strat_time}")
 
         db.drop_table(collection_name)
@@ -188,7 +211,7 @@ def Benchmark(
 
 
 if __name__ == "__main__":
-    csv_path = "./data/clustered_vectors.csv"
-    test_csv_path = "./data/clustered_vectors_test.csv"
-    result_file = "./result/result.json"
+    csv_path = "./data/clustered_vectors_small.csv"
+    test_csv_path = "./data/clustered_vectors_test_small.csv"
+    result_file = "./result/result_samll.json"
     Benchmark(csv_path, test_csv_path, result_file=result_file)

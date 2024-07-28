@@ -5,12 +5,12 @@ from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QLineEdit, QFileDialog, QCheckBox,
     QScrollArea, QLabel, QSpinBox)
-from PyQt5.QtCore import Qt
+# from PyQt5.QtCore import Qt
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas)
 import matplotlib.pyplot as plt
 from plotting import get_plot_figure
-from testing import Benchmark
+from benchmark import Benchmark
 from data_generation import generate_dataset
 import pandas as pd
 
@@ -34,7 +34,8 @@ class PlotData(FigureCanvas):
     def plot(self, data, x_index=0, y_index=1, num_samples=100):
         self.ax.clear()
         sampled_data = data.sample(n=num_samples)
-        self.ax.scatter(sampled_data.iloc[:, x_index], sampled_data.iloc[:, y_index])
+        self.ax.scatter(sampled_data.iloc[:, x_index],
+                        sampled_data.iloc[:, y_index])
         self.ax.set_xlabel(f"Dimension {x_index}")
         self.ax.set_ylabel(f"Dimension {y_index}")
         self.draw()
@@ -63,7 +64,7 @@ class MainWindow(QMainWindow):
 
         self.tabs.addTab(self.tab1, "Results")
         self.tabs.addTab(self.tab2, "Data Generation")
-        self.tabs.addTab(self.tab3, "Settings")
+        self.tabs.addTab(self.tab3, "Benchmark Test")
 
         self.initUI()
 
@@ -183,7 +184,7 @@ class MainWindow(QMainWindow):
         self.visualization_layout = QVBoxLayout()
         self.plot_data = PlotData(self, width=5, height=4, dpi=100)
         self.visualization_layout.addWidget(self.plot_data)
-        
+
         # Spinboxes for visualization
         hbox_spin1 = QHBoxLayout()
         self.spin_x = QSpinBox()
@@ -250,7 +251,8 @@ class MainWindow(QMainWindow):
         self.dataset_checkboxes.append(checkbox)
         # Add the new dataset checkbox to the layout
         datasets_section_layout = self.tab3.layout().itemAt(0).layout()
-        datasets_section_layout.insertWidget(len(self.dataset_checkboxes) - 1, checkbox)
+        datasets_section_layout.insertWidget(len(self.dataset_checkboxes) - 1,
+                                             checkbox)
 
     def updateVisualization(self):
         num_samples = int(self.num_samples.text())
@@ -353,7 +355,7 @@ class MainWindow(QMainWindow):
 
         # Run Tests Section
         run_tests_section = QVBoxLayout()
-        run_tests_label = QLabel("Run Tests")
+        run_tests_label = QLabel("Results")
         run_tests_section.addWidget(run_tests_label)
 
         hbox_result = QHBoxLayout()
@@ -438,7 +440,7 @@ class MainWindow(QMainWindow):
     def runTests(self):
         new_dataset_names = []
         new_dataset_results = []
-        for checkbox,dataset_name, dataset_file in zip(
+        for checkbox, dataset_name, dataset_file in zip(
              self.dataset_checkboxes, self.dataset_names, self.datasets_files):
             if checkbox.isChecked():
                 test_csv_path = dataset_file.replace("data.csv", "test.csv")

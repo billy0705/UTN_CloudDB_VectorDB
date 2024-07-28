@@ -71,7 +71,7 @@ class PGvectorInterface:
 
     def get_size_of_table(self, table_name):
         query = f"""SELECT
-         pg_total_relation_size('{table_name}'), pg_table_size('{table_name}'), 
+         pg_total_relation_size('{table_name}'), pg_table_size('{table_name}'),
          pg_indexes_size('{table_name}')"""
         result = self.conn.execute(query).fetchall()
         self.conn.commit()
@@ -131,8 +131,8 @@ class PGvectorInterface:
         SELECT id, embedding {symbol} (%s) AS distance
         FROM {table_name}
         ORDER BY distance ASC
-        LIMIT 1
+        LIMIT 3
         """
         result = self.conn.execute(sim_query, (embedding_vector,)).fetchall()
         # print(result)
-        return result
+        return result[0][0], result[0][1]

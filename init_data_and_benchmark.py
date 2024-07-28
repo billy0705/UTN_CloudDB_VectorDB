@@ -1,6 +1,6 @@
 import os
 from data_generation import generate_dataset
-from testing import Benchmark
+from benchmark import Benchmark
 
 
 # Function to check and create directory
