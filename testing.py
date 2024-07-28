@@ -117,9 +117,20 @@ def Benchmark(
     # vector = {test_data_shape[0]}
     dimension = {test_data_shape[1]}""")
 
+    test_interfaces = []
+    if len(qdrant_db_path) > 0:
+        test_interfaces.append(QDrantInterface)
+        print("Added QDrantInterface to the test.")
+    if len(milvus_db_path) > 0:
+        test_interfaces.append(MilvusInterface)
+        print("Added MilvusInterface to the test.")
+    if len(pg_dbname) > 0 or len(pg_username) > 0:
+        test_interfaces.append(PGvectorInterface)
+        print("Added PGvectorInterface to the test.")
+
     total_start_time = time.time()
 
-    for db_interface in test_db_interface:
+    for db_interface in test_interfaces:
         # print(db_name_dict[db_interface])
         if db_interface == PGvectorInterface:
             db = db_interface(pg_dbname, pg_username)

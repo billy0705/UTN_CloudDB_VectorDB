@@ -1,0 +1,66 @@
+[
+    {
+        "Name": "QDrant",
+        "Train-Data-info": {
+            "#vector": 10000,
+            "dimension": 1000
+        },
+        "Test-Data-info": {
+            "#vector": 100,
+            "dimension": 1000
+        },
+        "Test round": 1,
+        "Methods": {
+            "HNSW+COSINE": {
+                "create_time": 0.005864381790161133,
+                "insert_time": 38.85059857368469,
+                "similarity_time": 5.03592848777771,
+                "size": 95834112
+            },
+            "HNSW+EUCLID": {
+                "create_time": 0.1902623176574707,
+                "insert_time": 43.160884141922,
+                "similarity_time": 12.648733139038086,
+                "size": 95834112
+            }
+        }
+    },
+    {
+        "Name": "Milvus",
+        "Train-Data-info": {
+            "#vector": 10000,
+            "dimension": 1000
+        },
+        "Test-Data-info": {
+            "#vector": 100,
+            "dimension": 1000
+        },
+        "Test round": 1,
+        "Methods": {
+            "HNSW+L2": {
+                "create_time": 1.0350654125213623,
+                "insert_time": 0.9302451610565186,
+                "similarity_time": 0.5157544612884521,
+                "size": 0
+            },
+            "HNSW+COSINE": {
+                "create_time": 1.0451927185058594,
+                "insert_time": 1.0736160278320312,
+                "similarity_time": 0.2145531177520752,
+                "size": 0
+            },
+            "FLAT+L2": {
+                "create_time": 1.030768632888794,
+                "insert_time": 0.8402872085571289,
+                "similarity_time": 0.21739649772644043,
+                "size": 0
+            },
+            "FLAT+COSINE": {
+                "create_time": 1.0356323719024658,
+                "insert_time": 0.7162373065948486,
+                "similarity_time": 0.22283029556274414,
+                "size": 0
+            }
+        }
+    }
+]
