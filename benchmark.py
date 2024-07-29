@@ -43,6 +43,7 @@ def benchmark_test(i, index_type: str, metric: str, db_BM,
         db_BM["Methods"][t_name]["insert_time"] = 0
         db_BM["Methods"][t_name]["similarity_time"] = 0
         db_BM["Methods"][t_name]["size"] = 0
+        db_BM["Methods"][t_name]["total_distance"] = 0
     print(f"Round {i+1} start")
 
     db.drop_table(collection_name)
@@ -60,7 +61,7 @@ def benchmark_test(i, index_type: str, metric: str, db_BM,
     # insert data
     start_time = time.time()
     db.insert_vector_from_csv(collection_name, data)
-    if index_type == "ivfflat":
+    if index_type == "ivfflat" or db_BM["Name"] == "Milvus":
         db.indexing_data(collection_name, metric, index_type)
     db_BM["Methods"][t_name]["insert_time"] += (time.time() -
                                                 start_time)
@@ -99,8 +100,8 @@ def benchmark_test(i, index_type: str, metric: str, db_BM,
         time.time() - start_time
     )
 
-    db_BM["Methods"][t_name]["total_distance"] = (distances_total /
-                                                  test_vector.shape[0])
+    db_BM["Methods"][t_name]["total_distance"] += (distances_total /
+                                                   test_vector.shape[0])
 
     # others ...
     print(f"{distances_total = }")
@@ -180,21 +181,21 @@ def Benchmark(
 
         for index_type in test_index_type[db_interface]:
             for metric in test_metric[db_interface]:
-                # if db_interface == PGvectorInterface:
-                #     if index_type == "hnsw":
-                #         if metric == "l2":
-                #             continue
+                print("#"*40)
+                print(f"{db_name_dict[db_interface]}")
+                print(f"{index_type = } and {metric = }")
                 for i in range(test_round):
                     round_strat_time = time.time()
-                    print("#"*40)
-                    print(f"{db_name_dict[db_interface]}")
-                    print(f"{index_type = } and {metric = }")
-
                     db_BM = benchmark_test(i, index_type, metric,
                                            db_BM, db, collection_name,
                                            csv_path, test_vector)
-
                     print(f"Round {i+1} spent {time.time()-round_strat_time}")
+                t_name = f"{index_type.upper()}+{metric.upper()}"
+                db_BM["Methods"][t_name]["create_time"] /= test_round
+                db_BM["Methods"][t_name]["insert_time"] /= test_round
+                db_BM["Methods"][t_name]["similarity_time"] /= test_round
+                db_BM["Methods"][t_name]["size"] /= test_round
+                db_BM["Methods"][t_name]["total_distance"] /= test_round
 
         db.drop_table(collection_name)
         db.disconnect_server()
@@ -213,5 +214,5 @@ def Benchmark(
 if __name__ == "__main__":
     csv_path = "./data/clustered_vectors_small.csv"
     test_csv_path = "./data/clustered_vectors_test_small.csv"
-    result_file = "./result/result_samll.json"
-    Benchmark(csv_path, test_csv_path, result_file=result_file)
+    result_file = "./result/result_small.json"
+    Benchmark(csv_path, test_csv_path, result_file=result_file, test_round=1)

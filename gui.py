@@ -356,7 +356,12 @@ class MainWindow(QMainWindow):
         # Run Tests Section
         run_tests_section = QVBoxLayout()
         run_tests_label = QLabel("Results")
+        test_round_label = QLabel("Test round:")
+        self.test_round = QLineEdit("1")
+        self.test_round.setPlaceholderText("Test round")
         run_tests_section.addWidget(run_tests_label)
+        run_tests_section.addWidget(test_round_label)
+        run_tests_section.addWidget(self.test_round)
 
         hbox_result = QHBoxLayout()
         self.result_folder_path = QLineEdit('./result/')
@@ -456,12 +461,14 @@ class MainWindow(QMainWindow):
                     .milvus_checkbox.isChecked() else ''
                 qdrantdb_path = self.qdrant_db_path.text() if self\
                     .qdrant_checkbox.isChecked() else ''
+                test_round = int(self.test_round.text())
 
                 Benchmark(
                     csv_path=dataset_file, test_csv_path=test_csv_path,
                     result_file=result_file, pg_dbname=pgname,
                     pg_username=pgusername, pg_password=pgpassword,
-                    milvus_db_path=milvusdb_path, qdrant_db_path=qdrantdb_path
+                    milvus_db_path=milvusdb_path, qdrant_db_path=qdrantdb_path,
+                    test_round=test_round
                 )
                 new_dataset_names.append(dataset_name)
                 new_dataset_results.append(result_file)

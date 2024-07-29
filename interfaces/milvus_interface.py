@@ -27,14 +27,14 @@ class MilvusInterface:
             )
             print(res)
         else:
-            index_params = self.client.prepare_index_params()
-            index_params.add_index(
-                field_name="vector",
-                metric_type=metric,
-                index_type=index_types,
-                index_name="vector_index",
-                params={"nlist": 128}
-            )
+            # index_params = self.client.prepare_index_params()
+            # index_params.add_index(
+            #     field_name="vector",
+            #     metric_type=metric,
+            #     index_type=index_types,
+            #     index_name="vector_index",
+            #     params={"nlist": 128}
+            # )
 
             self.client.create_collection(
                 collection_name=name,
@@ -42,11 +42,25 @@ class MilvusInterface:
                 metric_type=metric
             )
 
-            self.client.create_index(
-                collection_name=name,
-                index_params=index_params
-            )
+            # self.client.create_index(
+            #     collection_name=name,
+            #     index_params=index_params
+            # )
         pass
+
+    def indexing_data(self, name, metric, index_type):
+        index_params = self.client.prepare_index_params()
+        index_params.add_index(
+            field_name="vector",
+            metric_type=metric,
+            index_type=index_type,
+            index_name="vector_index",
+            params={"nlist": 1024}
+        )
+        self.client.create_index(
+            collection_name=name,
+            index_params=index_params
+        )
 
     def drop_table(self, name):
         self.client.drop_collection(
