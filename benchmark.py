@@ -16,7 +16,7 @@ def get_data_info(csv_path):
 
 
 test_db_interface = [QDrantInterface, MilvusInterface, PGvectorInterface]
-# test_db_interface = [PGvectorInterface]
+test_db_interface = [PGvectorInterface]
 test_metric = {
     PGvectorInterface: ["cosine", "l2"],
     MilvusInterface: ["COSINE", "L2"],
@@ -62,9 +62,13 @@ def benchmark_test(i, index_type: str, metric: str, db_BM,
     start_time = time.time()
     db.insert_vector_from_csv(collection_name, data)
     if index_type == "ivfflat" or db_BM["Name"] == "Milvus":
+        # if index_type == "ivfflat":
+        #     pass
+        print("indexing")
         db.indexing_data(collection_name, metric, index_type)
-    db_BM["Methods"][t_name]["insert_time"] += (time.time() -
-                                                start_time)
+    db_BM["Methods"][t_name]["insert_time"] += (
+        len(data) / (time.time() - start_time)
+    )
 
     # size of table
     db_BM["Methods"][t_name]["size"] += db.get_size_of_table(
@@ -84,7 +88,7 @@ def benchmark_test(i, index_type: str, metric: str, db_BM,
         # print(data[id])
         B = test_vector[test_i, :]
         if db_BM["Name"] == "PGvector":
-            A = data[id]
+            A = data[id][1]
         elif db_BM["Name"] == "QDrant":
             A = data[id].vector
         else:
@@ -97,7 +101,7 @@ def benchmark_test(i, index_type: str, metric: str, db_BM,
         # print(f"{npdist = }")
 
     db_BM["Methods"][t_name]["similarity_time"] += (
-        time.time() - start_time
+        test_vector.shape[0] / (time.time() - start_time)
     )
 
     db_BM["Methods"][t_name]["total_distance"] += (distances_total /
@@ -215,4 +219,7 @@ if __name__ == "__main__":
     csv_path = "./data/clustered_vectors_small.csv"
     test_csv_path = "./data/clustered_vectors_test_small.csv"
     result_file = "./result/result_small.json"
+    # csv_path = "./data/clustered_vectors.csv"
+    # test_csv_path = "./data/clustered_vectors_test.csv"
+    # result_file = "./result/result.json"
     Benchmark(csv_path, test_csv_path, result_file=result_file, test_round=1)

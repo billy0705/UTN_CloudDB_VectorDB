@@ -49,10 +49,10 @@ def generate_figure(data, methods, title, ylabel):
 
 metrics_labels = {
     'create_time': ('Create Time Comparison', 'Time (s)'),
-    'insert_time': ('Insert Time Comparison', 'Time (s)'),
-    'similarity_time': ('Similarity Time Comparison', 'Time (s)'),
+    'insert_time': ('Insert Time Comparison', 'Vector per second'),
+    'similarity_time': ('Similarity Time Comparison', 'Vector per second'),
     'size': ('Size Comparison', 'Size (bytes)'),
-    'total_distance': ('Distance (Error)', 'Search Time (s)')
+    'total_distance': ('Distance (Error)', 'Vector per second')
 }
 
 
@@ -63,17 +63,19 @@ def generate_figure_quality(data, data2, methods, title, ylabel, metric="L2"):
     for db in data.keys():
         for method in data[db].keys():
             if method.split("+")[1] == "L2":
-                ax_l2.scatter(data[db][method], data2[db][method], label=f"{db}+{method}")
+                ax_l2.scatter(data[db][method], data2[db][method],
+                              label=f"{db}+{method}")
             elif method.split("+")[1] == "COSINE":
-                ax_cosine.scatter(data[db][method], data2[db][method], label=f"{db}+{method}")
+                ax_cosine.scatter(data[db][method], data2[db][method],
+                                  label=f"{db}+{method}")
 
-    ax_l2.set_xlabel('Total Distance')
+    ax_l2.set_xlabel('Average L2 Distance')
     ax_l2.set_ylabel(ylabel)
     ax_l2.set_title(f"{title} - L2 Metric")
     ax_l2.legend()
     ax_l2.grid(True)
 
-    ax_cosine.set_xlabel('Total Distance')
+    ax_cosine.set_xlabel('Average Cosine Distance')
     ax_cosine.set_title(f"{title} - COSINE Metric")
     ax_cosine.legend()
     ax_cosine.grid(True)

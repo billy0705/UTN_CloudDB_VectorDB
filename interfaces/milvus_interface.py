@@ -2,7 +2,7 @@
 # import numpy as np
 import pandas as pd
 # from milvus import default_server
-from pymilvus import MilvusClient
+from pymilvus import MilvusClient, DataType
 # from time import time
 
 
@@ -27,25 +27,38 @@ class MilvusInterface:
             )
             print(res)
         else:
-            # index_params = self.client.prepare_index_params()
-            # index_params.add_index(
-            #     field_name="vector",
-            #     metric_type=metric,
-            #     index_type=index_types,
-            #     index_name="vector_index",
-            #     params={"nlist": 128}
-            # )
-
-            self.client.create_collection(
-                collection_name=name,
-                dimension=dimention,
-                metric_type=metric
+            schema = MilvusClient.create_schema(
+                auto_id=False,
+                enable_dynamic_field=True,
             )
 
-            # self.client.create_index(
-            #     collection_name=name,
-            #     index_params=index_params
-            # )
+            # 2.2. Add fields to schema
+            schema.add_field(field_name="id",
+                             datatype=DataType.INT64,
+                             is_primary=True)
+            schema.add_field(field_name="vector",
+                             datatype=DataType.FLOAT_VECTOR,
+                             dim=dimention)
+
+            # 3. Create collection
+            self.client.create_collection(
+                collection_name=name,
+                schema=schema,
+                metric_type=metric
+            )
+            index_params = self.client.prepare_index_params()
+            index_params.add_index(
+                field_name="vector",
+                metric_type=metric,
+                index_type=index_types,
+                index_name="vector_index",
+                params={"nlist": 128}
+            )
+
+            self.client.create_index(
+                collection_name=name,
+                index_params=index_params
+            )
         pass
 
     def indexing_data(self, name, metric, index_type):
@@ -95,10 +108,16 @@ class MilvusInterface:
         return data
 
     def insert_vector_from_csv(self, name, data):
-        _ = self.client.insert(
+        r = self.client.upsert(
             collection_name=name,
             data=data
         )
+        # res = self.client.get(
+        #     collection_name=name,
+        #     ids=[10]
+        # )
+        print(r)
+        # print(res)
         pass
 
     def get_rows_cnt(self, name):
