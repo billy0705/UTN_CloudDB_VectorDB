@@ -52,35 +52,32 @@ metrics_labels = {
     'insert_time': ('Insert Time Comparison', 'Time (s)'),
     'similarity_time': ('Similarity Time Comparison', 'Time (s)'),
     'size': ('Size Comparison', 'Size (bytes)'),
-    'total_distance': ('Distence (Error)', 'Search Time (s)')
+    'total_distance': ('Distance (Error)', 'Search Time (s)')
 }
 
 
 def generate_figure_quality(data, data2, methods, title, ylabel, metric="L2"):
-    fig, ax = plt.subplots(figsize=(12, 8))
-    print(data)
-    print(data2)
+    fig, axs = plt.subplots(1, 2, figsize=(16, 8), sharey=True)
+    ax_l2, ax_cosine = axs
 
-    # databases = list(data.keys())
-    # x = []
-    # y = []
-    # label = []
     for db in data.keys():
         for method in data[db].keys():
-            if method.split("+")[1] == metric:
-                # print(data[db][method])
-                # print(data2[db][method])
-                # x.append(data[db][method])
-                # y.append(data2[db][method])
-                # label.append(method)
-                ax.scatter(data[db][method], data2[db][method], label=f"{db}+{method}")
+            if method.split("+")[1] == "L2":
+                ax_l2.scatter(data[db][method], data2[db][method], label=f"{db}+{method}")
+            elif method.split("+")[1] == "COSINE":
+                ax_cosine.scatter(data[db][method], data2[db][method], label=f"{db}+{method}")
 
-    # ax.set_xticklabels(databases)
-    ax.set_xlabel('Vector Database Frameworks')
-    ax.set_ylabel("similarity_time")
-    ax.set_title(f"{title} {metric = }")
-    ax.legend()
-    ax.grid(True)
+    ax_l2.set_xlabel('Total Distance')
+    ax_l2.set_ylabel(ylabel)
+    ax_l2.set_title(f"{title} - L2 Metric")
+    ax_l2.legend()
+    ax_l2.grid(True)
+
+    ax_cosine.set_xlabel('Total Distance')
+    ax_cosine.set_title(f"{title} - COSINE Metric")
+    ax_cosine.legend()
+    ax_cosine.grid(True)
+
     return fig
 
 
@@ -92,5 +89,6 @@ def get_plot_figure(metric, file_path):
         fig = generate_figure(data_extracted, methods, title, ylabel)
     else:
         data_extracted2, methods = extract_data(data, "similarity_time")
-        fig = generate_figure_quality(data_extracted, data_extracted2, methods, title, ylabel)
+        fig = generate_figure_quality(data_extracted, data_extracted2,
+                                      methods, title, ylabel)
     return fig
