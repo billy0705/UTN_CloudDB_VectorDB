@@ -6,6 +6,12 @@
 pip install -r requirements.txt
 ```
 
+### Generate initial Data, Test, and Results
+
+```
+python3 init_data_and_benchmark.py
+```
+
 ### Run the APP
 
 ```
