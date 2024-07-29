@@ -50,7 +50,7 @@ class MainWindow(QMainWindow):
                                "./data/large_dataset/data.csv"]
         self.dataset_names = ["Small Dataset", "Large Dataset"]
         self.metrics = ['create_time', 'insert_time',
-                        'similarity_time', 'size']
+                        'similarity_time', 'size', 'total_distance']
 
         self.setWindowTitle("Vector Database Benchmarking Tool")
         self.setGeometry(100, 100, 1200, 800)
@@ -86,6 +86,11 @@ class MainWindow(QMainWindow):
         for i, metric in enumerate(self.metrics):
             metric_layout = QVBoxLayout()
 
+            # if metric == "quality":
+            #     whole_button_layout = QVBoxLayout()
+            #     button_layout = QHBoxLayout()
+            # else:
+            #     button_layout = QHBoxLayout()
             button_layout = QHBoxLayout()
             for j, (dataset, dataset_name) in enumerate(
                  zip(self.datasets_result_files, self.dataset_names)):
@@ -103,6 +108,13 @@ class MainWindow(QMainWindow):
                     # Track the correct layout for the first plot
                     first_metric_layout = metric_layout
 
+            # if metric == "quality":
+            #     whole_button_layout = QVBoxLayout()
+            #     button_layout = QHBoxLayout()
+            #     whole_button_layout.addLayout(button_layout)
+            #     metric_layout.addLayout(whole_button_layout)
+            # else:
+            #     metric_layout.addLayout(button_layout)
             metric_layout.addLayout(button_layout)
             fig = get_plot_figure(metric, default_dataset)
             plot_canvas = PlotCanvas(self.scrollContent,

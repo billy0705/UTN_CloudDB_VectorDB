@@ -51,13 +51,46 @@ metrics_labels = {
     'create_time': ('Create Time Comparison', 'Time (s)'),
     'insert_time': ('Insert Time Comparison', 'Time (s)'),
     'similarity_time': ('Similarity Time Comparison', 'Time (s)'),
-    'size': ('Size Comparison', 'Size (bytes)')
+    'size': ('Size Comparison', 'Size (bytes)'),
+    'total_distance': ('Distence (Error)', 'Search Time (s)')
 }
+
+
+def generate_figure_quality(data, data2, methods, title, ylabel, metric="L2"):
+    fig, ax = plt.subplots(figsize=(12, 8))
+    print(data)
+    print(data2)
+
+    # databases = list(data.keys())
+    # x = []
+    # y = []
+    # label = []
+    for db in data.keys():
+        for method in data[db].keys():
+            if method.split("+")[1] == metric:
+                # print(data[db][method])
+                # print(data2[db][method])
+                # x.append(data[db][method])
+                # y.append(data2[db][method])
+                # label.append(method)
+                ax.scatter(data[db][method], data2[db][method], label=f"{db}+{method}")
+
+    # ax.set_xticklabels(databases)
+    ax.set_xlabel('Vector Database Frameworks')
+    ax.set_ylabel("similarity_time")
+    ax.set_title(f"{title} {metric = }")
+    ax.legend()
+    ax.grid(True)
+    return fig
 
 
 def get_plot_figure(metric, file_path):
     data = read_json(file_path)
     title, ylabel = metrics_labels[metric]
     data_extracted, methods = extract_data(data, metric)
-    fig = generate_figure(data_extracted, methods, title, ylabel)
+    if metric != 'total_distance':
+        fig = generate_figure(data_extracted, methods, title, ylabel)
+    else:
+        data_extracted2, methods = extract_data(data, "similarity_time")
+        fig = generate_figure_quality(data_extracted, data_extracted2, methods, title, ylabel)
     return fig
