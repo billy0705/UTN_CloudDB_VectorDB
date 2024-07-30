@@ -1,0 +1,114 @@
+[
+    {
+        "Name": "QDrant",
+        "Train-Data-info": {
+            "#vector": 100000,
+            "dimension": 768
+        },
+        "Test-Data-info": {
+            "#vector": 1000,
+            "dimension": 768
+        },
+        "Test round": 1,
+        "Methods": {
+            "HNSW+COSINE": {
+                "create_time": 0.016130924224853516,
+                "insert_time": 891.5103316060946,
+                "similarity_time": 1.6191486001701823,
+                "size": 823611392.0,
+                "total_distance": 0.8400971556600048
+            },
+            "HNSW+L2": {
+                "create_time": 0.03314399719238281,
+                "insert_time": 876.8918705065659,
+                "similarity_time": 1.1998872144283883,
+                "size": 823611392.0,
+                "total_distance": 14.368433437053618
+            }
+        }
+    },
+    {
+        "Name": "Milvus",
+        "Train-Data-info": {
+            "#vector": 100000,
+            "dimension": 768
+        },
+        "Test-Data-info": {
+            "#vector": 1000,
+            "dimension": 768
+        },
+        "Test round": 1,
+        "Methods": {
+            "HNSW+COSINE": {
+                "create_time": 0.5132749080657959,
+                "insert_time": 826.8718048236545,
+                "similarity_time": 529.8608110805395,
+                "size": 0.0,
+                "total_distance": 0.8266495601902036
+            },
+            "HNSW+L2": {
+                "create_time": 0.5075562000274658,
+                "insert_time": 897.3387792032546,
+                "similarity_time": 943.8637550182729,
+                "size": 0.0,
+                "total_distance": 14.887635592783667
+            },
+            "FLAT+COSINE": {
+                "create_time": 0.5380079746246338,
+                "insert_time": 930.0430434560417,
+                "similarity_time": 835.7298217956248,
+                "size": 0.0,
+                "total_distance": 0.8266495601902036
+            },
+            "FLAT+L2": {
+                "create_time": 0.5081400871276855,
+                "insert_time": 894.8912459592418,
+                "similarity_time": 1343.2174676069149,
+                "size": 0.0,
+                "total_distance": 14.887635592783667
+            }
+        }
+    },
+    {
+        "Name": "PGvector",
+        "Train-Data-info": {
+            "#vector": 100000,
+            "dimension": 768
+        },
+        "Test-Data-info": {
+            "#vector": 1000,
+            "dimension": 768
+        },
+        "Test round": 1,
+        "Methods": {
+            "HNSW+COSINE": {
+                "create_time": 0.0518651008605957,
+                "insert_time": 42.669717861411755,
+                "similarity_time": 134.89136468392235,
+                "size": 832159744.0,
+                "total_distance": 0.8386869614521858
+            },
+            "HNSW+L2": {
+                "create_time": 0.03871297836303711,
+                "insert_time": 45.933704421502526,
+                "similarity_time": 307.8762905607156,
+                "size": 832159744.0,
+                "total_distance": 14.369192869987533
+            },
+            "IVFFLAT+COSINE": {
+                "create_time": 0.06790590286254883,
+                "insert_time": 851.8300332155718,
+                "similarity_time": 162.34066348550022,
+                "size": 1243004928.0,
+                "total_distance": 0.8349989246940851
+            },
+            "IVFFLAT+L2": {
+                "create_time": 0.04592609405517578,
+                "insert_time": 871.6258937268872,
+                "similarity_time": 327.6180085299485,
+                "size": 1242963968.0,
+                "total_distance": 14.42455991420126
+            }
+        }
+    }
+]

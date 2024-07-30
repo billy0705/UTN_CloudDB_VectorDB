@@ -45,12 +45,21 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.datasets_result_files = ["./result/small_dataset_result.json",
-                                      "./result/large_dataset_result.json"]
+                                      "./result/large_dataset_result.json",
+                                      "./result/200k_dataset_result.json"]
         self.datasets_files = ["./data/small_dataset/data.csv",
                                "./data/large_dataset/data.csv"]
-        self.dataset_names = ["Small Dataset", "Large Dataset"]
+        self.dataset_names = ["Small Dataset", "Large Dataset", "200k Dataset"]
         self.metrics = ['create_time', 'insert_time',
                         'similarity_time', 'size', 'total_distance']
+
+        self.metric_dict = {
+            'create_time': 'Create_time',
+            'insert_time': 'Loading_time',
+            'similarity_time': 'Similarity_time',
+            'size': 'Size',
+            'total_distance': 'Total_distance'
+        }
 
         self.setWindowTitle("Vector Database Benchmarking Tool")
         self.setGeometry(100, 100, 1200, 800)
@@ -94,8 +103,10 @@ class MainWindow(QMainWindow):
             button_layout = QHBoxLayout()
             for j, (dataset, dataset_name) in enumerate(
                  zip(self.datasets_result_files, self.dataset_names)):
+                
                 dataset_button = QPushButton(
-                    f"{dataset_name} - {metric.replace('_', ' ').title()}")
+                    f"{dataset_name} - {self.metric_dict[metric].replace('_', ' ').title()}"
+                )
                 dataset_button.setCheckable(True)
                 dataset_button.setChecked(False)  # Initially unchecked
                 dataset_button.clicked.connect(

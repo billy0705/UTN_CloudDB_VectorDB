@@ -49,7 +49,7 @@ def generate_figure(data, methods, title, ylabel):
 
 metrics_labels = {
     'create_time': ('Create Time Comparison', 'Time (s)'),
-    'insert_time': ('Insert Time Comparison', 'Vector per second'),
+    'insert_time': ('Loading Time Comparison', 'Vector per second'),
     'similarity_time': ('Similarity Time Comparison', 'Vector per second'),
     'size': ('Size Comparison', 'Size (bytes)'),
     'total_distance': ('Distance (Error)', 'Vector per second')

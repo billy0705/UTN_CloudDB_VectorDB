@@ -67,8 +67,7 @@ class MilvusInterface:
             field_name="vector",
             metric_type=metric,
             index_type=index_type,
-            index_name="vector_index",
-            params={"nlist": 1024}
+            index_name="vector_index"
         )
         self.client.create_index(
             collection_name=name,
